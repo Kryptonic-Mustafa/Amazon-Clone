@@ -1,4 +1,7 @@
-"use client";
+import os
+
+FILES_TO_UPDATE = {
+    "app/shop/[id]/page.tsx": r""""use client";
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -248,3 +251,18 @@ export default function ProductDetailPage() {
     </div>
   );
 }
+"""
+}
+
+def apply_related_products():
+    print("Injecting Related Products Logic...")
+    for file_path, content in FILES_TO_UPDATE.items():
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content.strip() + "\n")
+        print(f"✅ Enhanced: {file_path}")
+        
+    print("\n🎉 DONE! The Product Details page now dynamically shows a beautiful grid of Related Products at the bottom.")
+
+if __name__ == "__main__":
+    apply_related_products()

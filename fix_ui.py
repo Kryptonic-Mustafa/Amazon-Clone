@@ -1,4 +1,116 @@
-"use client";
+import os
+
+FILES_TO_UPDATE = {
+    # ==========================================
+    # 1. THE PRODUCT CARD (Fixes Badges & Button)
+    # ==========================================
+    "components/shop/ProductCard.tsx": r""""use client";
+
+import Link from 'next/link';
+import Image from 'next/image';
+import { Star, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
+import toast from 'react-hot-toast';
+
+export default function ProductCard({ product }: { product: any }) {
+  const { addToCart } = useCart();
+  
+  // --- DISCOUNT CALCULATION ---
+  // Uses discount_percent if available, otherwise calculates it
+  const originalPrice = Number(product.compare_at_price || product.original_price || 0);
+  const currentPrice = Number(product.price || 0);
+  
+  let discount = Number(product.discount_percent || product.discount || 0);
+  if (discount === 0 && originalPrice > currentPrice) {
+      discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+  }
+  
+  // Also check sale_flag if your DB uses that
+  const hasDiscount = discount > 0 || product.sale_flag === 1;
+  const imageSrc = product.image_urls ? product.image_urls.split(',')[0] : '/placeholder.png';
+
+  const handleAdd = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigating to the product page
+    addToCart({ ...product, quantity: 1, image_urls: imageSrc });
+    // Single clean toast alert
+    toast.success(`${product.name} added to cart!`);
+  };
+
+  return (
+    <div className="group relative bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+      
+      {/* TOP LEFT: Discount Percentage Badge */}
+      {hasDiscount && discount > 0 && (
+        <div className="absolute top-3 left-3 z-10 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">
+          -{discount}%
+        </div>
+      )}
+
+      {/* TOP RIGHT: SALE Badge */}
+      {hasDiscount && (
+        <div className="absolute top-3 right-3 z-10 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-sm tracking-wider uppercase shadow-sm">
+          SALE
+        </div>
+      )}
+      
+      <Link href={`/shop/${product.id}`} className="block relative h-64 w-full bg-slate-50 p-6 overflow-hidden">
+        <Image 
+          src={imageSrc} 
+          alt={product.name} 
+          fill 
+          className="object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" 
+        />
+      </Link>
+      
+      <div className="p-5 flex flex-col flex-grow">
+        <div className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">
+          {product.category || 'General'}
+        </div>
+        <Link href={`/shop/${product.id}`}>
+          <h3 className="font-semibold text-slate-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors">
+            {product.name}
+          </h3>
+        </Link>
+        
+        {/* Ratings */}
+        <div className="flex items-center gap-1 mb-3">
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} size={14} className={i < 4 ? "fill-yellow-400 text-yellow-400" : "fill-slate-200 text-slate-200"} />
+          ))}
+          <span className="text-xs text-slate-500 ml-1">({product.rating || '4.0'})</span>
+        </div>
+
+        <div className="mt-auto flex items-end justify-between">
+          <div>
+            {hasDiscount && (
+              <div className="text-xs text-slate-400 line-through mb-0.5">
+                ${originalPrice > 0 ? originalPrice.toFixed(2) : (currentPrice * 1.2).toFixed(2)}
+              </div>
+            )}
+            <div className="text-xl font-black text-slate-900">
+              ${currentPrice.toFixed(2)}
+            </div>
+          </div>
+          
+          {/* STATIC CART ICON BUTTON - No text changes */}
+          <button 
+            onClick={handleAdd}
+            className="bg-slate-900 text-white p-3 rounded-xl hover:bg-blue-600 hover:shadow-lg transition-all active:scale-95"
+            title="Add to Cart"
+          >
+            <ShoppingCart size={18} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+""",
+
+    # ==========================================
+    # 2. PRODUCT DETAILS PAGE (Enhanced Layout)
+    # ==========================================
+    "app/shop/[id]/page.tsx": r""""use client";
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -10,7 +122,6 @@ import {
   ArrowLeft, ShoppingCart, Zap, CheckCircle2 
 } from 'lucide-react';
 import Footer from '@/components/shop/Footer';
-import ProductCard from '@/components/shop/ProductCard';
 import toast from 'react-hot-toast';
 
 export default function ProductDetailPage() {
@@ -20,50 +131,20 @@ export default function ProductDetailPage() {
   const { user } = useAuth();
   
   const [product, setProduct] = useState<any>(null);
-  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState('');
   const [qty, setQty] = useState(1);
 
   useEffect(() => {
-    const fetchProductData = async () => {
-      try {
-        // 1. Fetch the main product
-        const res = await fetch(`/api/shop/products/${id}`);
-        const data = await res.json();
-        const currentProduct = data.product || data;
-        
-        if (currentProduct) {
-          setProduct(currentProduct);
-          setSelectedImage(currentProduct.image_urls ? currentProduct.image_urls.split(',')[0] : '/placeholder.png');
-          
-          // 2. Fetch all products to find related ones
-          const allRes = await fetch('/api/shop/products');
-          const allData = await allRes.json();
-          
-          if (Array.isArray(allData)) {
-            // Remove the current product from the list
-            const otherProducts = allData.filter(p => String(p.id) !== String(id));
-            
-            // Find products in the SAME category
-            const sameCategory = otherProducts.filter(p => p.category_ids === currentProduct.category_ids);
-            
-            // Find products in DIFFERENT categories (to fill the grid if needed)
-            const differentCategory = otherProducts.filter(p => p.category_ids !== currentProduct.category_ids);
-            
-            // Combine them: Same category first, then others, and slice top 4
-            const combinedRelated = [...sameCategory, ...differentCategory].slice(0, 4);
-            setRelatedProducts(combinedRelated);
-          }
+    fetch(`/api/shop/products/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.product) {
+          setProduct(data.product);
+          setSelectedImage(data.product.image_urls ? data.product.image_urls.split(',')[0] : '/placeholder.png');
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) fetchProductData();
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
   const handleAddToCart = () => {
@@ -76,7 +157,7 @@ export default function ProductDetailPage() {
     router.push('/checkout');
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-blue-600 font-bold tracking-widest">Loading Product...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-blue-600 font-bold">Loading Product...</div>;
   if (!product) return <div className="min-h-screen flex flex-col items-center justify-center gap-4"><h1 className="text-2xl font-bold">Product not found</h1><button onClick={() => router.back()} className="text-blue-600 hover:underline">Go Back</button></div>;
 
   const images = product.image_urls ? product.image_urls.split(',') : ['/placeholder.png'];
@@ -94,7 +175,6 @@ export default function ProductDetailPage() {
           <ArrowLeft size={18} /> Back
         </button>
         
-        {/* MAIN PRODUCT BLOCK */}
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
             
@@ -127,7 +207,7 @@ export default function ProductDetailPage() {
             {/* 2. PRODUCT DETAILS & BUY BOX */}
             <div className="lg:col-span-6 p-6 md:p-10 flex flex-col">
               
-              <div className="mb-2 text-sm font-bold text-blue-600 uppercase tracking-widest">{product.category_name || product.category || 'Premium Collection'}</div>
+              <div className="mb-2 text-sm font-bold text-blue-600 uppercase tracking-widest">{product.category || 'Premium Collection'}</div>
               <h1 className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight mb-4">{product.name}</h1>
               
               <div className="flex items-center gap-4 mb-6">
@@ -157,7 +237,7 @@ export default function ProductDetailPage() {
                       <Truck className="text-blue-600 mt-1 flex-shrink-0" size={20}/>
                       <div>
                           <h4 className="font-bold text-slate-900 text-sm">Free Delivery</h4>
-                          <p className="text-xs text-slate-500 mt-0.5">Dispatched in 24h</p>
+                          <p className="text-xs text-slate-500 mt-0.5">Thursday, Dec 21</p>
                       </div>
                   </div>
                   <div className="bg-slate-50 p-4 rounded-2xl flex items-start gap-3 border border-slate-100">
@@ -221,30 +301,24 @@ export default function ProductDetailPage() {
             </div>
           </div>
         </div>
-
-        {/* --- NEW: RELATED PRODUCTS SECTION --- */}
-        {relatedProducts.length > 0 && (
-          <div className="mt-16 mb-8">
-            <div className="flex items-center justify-between mb-8 border-b border-slate-200 pb-4">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">You Might Also Like</h2>
-              <button 
-                onClick={() => router.push('/shop')} 
-                className="text-blue-600 font-bold text-sm hover:underline hover:text-blue-800"
-              >
-                View More
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map(rp => (
-                <ProductCard key={rp.id} product={rp} />
-              ))}
-            </div>
-          </div>
-        )}
-
       </main>
       <Footer />
     </div>
   );
 }
+"""
+}
+
+def apply_changes():
+    print("Starting UI Enhancement Process...")
+    for file_path, content in FILES_TO_UPDATE.items():
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content.strip() + "\n")
+        print(f"✅ Re-wrote: {file_path}")
+        
+    print("\n🎉 Process Complete! Your Product Card and View Product pages have been supercharged.")
+    print("👉 NOTE FOR SORTING: To fix your shop page sorting, please ensure your useEffect in `app/shop/page.tsx` includes `sortOption` in its dependency array like this: `}, [allProducts, sortOption]);`")
+
+if __name__ == "__main__":
+    apply_changes()

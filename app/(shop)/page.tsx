@@ -9,6 +9,7 @@ import Link from 'next/link';
 export default function LandingPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortOption, setSortOption] = useState("newest");
   
   useEffect(() => {
     fetch('/api/shop/products')

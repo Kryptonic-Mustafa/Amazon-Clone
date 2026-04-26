@@ -157,15 +157,7 @@ export default function HomePage() {
                   <h3 className="font-medium text-slate-900 mb-2 line-clamp-1">{product.name}</h3>
                   <div className="mt-auto flex items-center justify-between">
                     <span className="text-xl font-bold text-slate-900">${Number(product.price).toFixed(2)}</span>
-                    
-                    {/* THE FIX IS HERE: Removed pointer-events-none, added onMouseDown stopPropagation */}
-                    <Link 
-                      href={`/shop/${product.id}`} 
-                      onMouseDown={(e) => e.stopPropagation()}
-                      className="text-sm font-medium text-white bg-slate-900 hover:bg-blue-600 transition-colors px-4 py-2 rounded-lg pointer-events-auto"
-                    >
-                      View
-                    </Link>
+                    <Link href={`/shop/${product.id}`} className="text-sm font-medium text-white bg-slate-900 px-4 py-2 rounded-lg pointer-events-none">View</Link>
                   </div>
                 </div>
               </div>

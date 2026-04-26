@@ -6,7 +6,6 @@ import { useAuth } from "@/context/AuthContext";
 import CartDrawer from "./CartDrawer";
 import Link from "next/link";
 import { FaShoppingCart, FaSearch, FaBars, FaUser, FaSignOutAlt, FaCog } from "react-icons/fa";
-import SearchBar from "./SearchBar";
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -32,14 +31,22 @@ export default function Header() {
       <header className="sticky top-0 z-30 bg-gray-900 text-white shadow-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           
-          <Link href="/" className="text-2xl font-bold text-white tracking-wide shrink-0">
+          <Link href="/" className="text-2xl font-bold text-white tracking-wide">
             Amazon<span className="text-yellow-400">Clone</span>
           </Link>
 
-          {/* THE NEW AMAZON SEARCH BAR */}
-          <SearchBar />
+          <nav className="hidden md:flex space-x-8 text-sm font-medium">
+            {navLinks.map((link) => (
+              <Link key={link.name} href={link.href} className="hover:text-yellow-400 transition-colors">
+                {link.name}
+              </Link>
+            ))}
+          </nav>
 
-          <div className="flex items-center space-x-5 shrink-0">
+          <div className="flex items-center space-x-5">
+            <button className="hidden sm:block hover:text-yellow-400">
+              <FaSearch />
+            </button>
 
             {/* DYNAMIC USER SECTION */}
             {user ? (
@@ -59,7 +66,7 @@ export default function Header() {
                 {isProfileOpen && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setIsProfileOpen(false)} />
-                    <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl py-2 z-20 text-gray-800 animate-in fade-in slide-in-from-top-2 border border-gray-100">
+                    <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl py-2 z-20 text-gray-800 animate-in fade-in slide-in-from-top-2">
                       <div className="px-4 py-2 border-b border-gray-100 mb-1">
                         <p className="text-xs text-gray-500">Signed in as</p>
                         <p className="font-bold truncate text-sm">{user.email}</p>
@@ -74,7 +81,7 @@ export default function Header() {
                       )}
                       <button 
                         onClick={() => { logout(); setIsProfileOpen(false); }}
-                        className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 flex items-center gap-2 text-sm mt-1 border-t border-gray-100 font-medium"
+                        className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 flex items-center gap-2 text-sm mt-1 border-t border-gray-100"
                       >
                         <FaSignOutAlt /> Logout
                       </button>
@@ -83,15 +90,15 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <Link href="/login" className="flex items-center space-x-1 hover:text-yellow-400 text-sm font-medium">
+              <Link href="/login" className="flex items-center space-x-1 hover:text-yellow-400 text-sm">
                 <FaUser /> <span className="hidden sm:inline">Login</span>
               </Link>
             )}
 
-            <button onClick={() => setIsCartOpen(true)} className="relative flex items-center hover:text-yellow-400 transition-colors">
-              <FaShoppingCart size={24} />
+            <button onClick={() => setIsCartOpen(true)} className="relative flex items-center hover:text-yellow-400">
+              <FaShoppingCart size={20} />
               {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-yellow-400 text-black text-[11px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-yellow-400 text-black text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                   {totalItems}
                 </span>
               )}
@@ -103,11 +110,10 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-gray-800 py-2 border-t border-gray-700">
+          <div className="md:hidden bg-gray-800 py-2">
             {navLinks.map((link) => (
-              <Link key={link.name} href={link.href} className="block px-4 py-3 text-sm font-medium text-gray-200 hover:bg-gray-700 hover:text-yellow-400" onClick={() => setIsMobileMenuOpen(false)}>
+              <Link key={link.name} href={link.href} className="block px-4 py-2 hover:bg-gray-700 hover:text-yellow-400" onClick={() => setIsMobileMenuOpen(false)}>
                 {link.name}
               </Link>
             ))}
