@@ -72,7 +72,7 @@ export default function AdminProductsPage() {
         sale_flag: product.sale_flag || 0, stock_qty: product.stock_qty?.toString() || '',
         image_urls: product.image_urls || '', description: product.description || ''
       });
-      setSelectedCats(product.category_ids ? String(product.category_ids).split(',').map(id => id.trim()) : []);
+      setSelectedCats(product.category_ids ? String(product.category_ids).split(',').map((id: any) => id.trim()) : []);
       if (product.specifications && Object.keys(product.specifications).length > 0) {
         setSpecs(Object.entries(product.specifications).map(([k, v]) => ({ key: k, value: String(v) })));
       } else { setSpecs([]); }
@@ -151,7 +151,7 @@ export default function AdminProductsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {products.map(p => (
+              {products.map((p: any) => (
                 <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 flex items-center gap-4">
                     <img src={p.image_urls ? p.image_urls.split(',')[0] : '/placeholder.png'} className="w-12 h-12 object-contain bg-white border border-slate-200 rounded-lg p-1" />
@@ -183,7 +183,7 @@ export default function AdminProductsPage() {
               ) : (<button onClick={handleSaveBrand} className="bg-slate-900 text-white px-6 rounded-xl font-bold shadow-sm">Add</button>)}
             </div>
             <div className="max-h-80 overflow-y-auto custom-scrollbar bg-white">
-              <table className="w-full text-left"><tbody className="divide-y divide-slate-100">{brands.map(b => (
+              <table className="w-full text-left"><tbody className="divide-y divide-slate-100">{brands.map((b: any) => (
                 <tr key={b.id} className="hover:bg-slate-50 transition-colors group">
                   <td className="px-6 py-4 font-bold text-slate-800">{b.name}</td>
                   <td className={`px-6 py-4 ${isRTL ? 'text-left' : 'text-right'}`}><button onClick={() => {setEditingBrandId(b.id); setBrandInput(b.name);}} className="p-2 text-slate-400 opacity-40 group-hover:opacity-100 group-hover:text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"><Edit size={16}/></button></td>
@@ -205,7 +205,7 @@ export default function AdminProductsPage() {
               ) : (<button onClick={handleSaveCategory} className="bg-slate-900 text-white px-6 rounded-xl font-bold shadow-sm">Add</button>)}
             </div>
             <div className="max-h-80 overflow-y-auto custom-scrollbar bg-white">
-              <table className="w-full text-left"><tbody className="divide-y divide-slate-100">{categories.map(c => (
+              <table className="w-full text-left"><tbody className="divide-y divide-slate-100">{categories.map((c: any) => (
                 <tr key={c.id} className="hover:bg-slate-50 transition-colors group">
                   <td className="px-6 py-4 font-bold text-slate-800">{c.name}</td>
                   <td className={`px-6 py-4 ${isRTL ? 'text-left' : 'text-right'}`}><button onClick={() => {setEditingCatId(c.id); setCatInput(c.name);}} className="p-2 text-slate-400 opacity-40 group-hover:opacity-100 group-hover:text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"><Edit size={16}/></button></td>
@@ -226,22 +226,22 @@ export default function AdminProductsPage() {
                   <h3 className="font-black text-blue-600 border-b pb-2 uppercase text-xs tracking-widest">Basic Details</h3>
                   <div><label className="block text-sm font-bold mb-1">Product Name</label><input required value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500" /></div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div><label className="block text-sm font-bold mb-1">Brand</label><select value={formData.brand} onChange={e=>setFormData({...formData, brand: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 bg-white"><option value="">Select Brand...</option>{brands.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}</select></div>
+                    <div><label className="block text-sm font-bold mb-1">Brand</label><select value={formData.brand} onChange={e=>setFormData({...formData, brand: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 bg-white"><option value="">Select Brand...</option>{brands.map((b: any) => <option key={b.id} value={b.name}>{b.name}</option>)}</select></div>
                     <div>
                       <label className="block text-sm font-bold mb-1">Categories</label>
                       <div className="relative w-full group">
                          <div onClick={() => setIsCatDropdownOpen(!isCatDropdownOpen)} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none bg-white cursor-pointer flex justify-between items-center text-sm font-medium"><span>{selectedCats.length} Selected</span> <ChevronDown size={16} className="text-slate-400"/></div>
                          {isCatDropdownOpen && (
                            <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-200 shadow-xl rounded-xl z-50 max-h-48 overflow-y-auto p-2">
-                              {categories.map(c => (
-                                 <label key={c.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 cursor-pointer rounded-lg transition-colors"><input type="checkbox" checked={selectedCats.includes(String(c.id))} onChange={(e) => { if(e.target.checked) setSelectedCats([...selectedCats, String(c.id)]); else setSelectedCats(selectedCats.filter(id => id !== String(c.id))); }} className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"/> <span className="text-sm font-medium">{c.name}</span></label>
+                              {categories.map((c: any) => (
+                                 <label key={c.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 cursor-pointer rounded-lg transition-colors"><input type="checkbox" checked={selectedCats.includes(String(c.id))} onChange={(e) => { if(e.target.checked) setSelectedCats([...selectedCats, String(c.id)]); else setSelectedCats(selectedCats.filter((id: any) => id !== String(c.id))); }} className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"/> <span className="text-sm font-medium">{c.name}</span></label>
                               ))}
                            </div>
                          )}
                       </div>
                       {selectedCats.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
-                           {selectedCats.map(id => { const cat = categories.find(c => String(c.id) === id); if (!cat) return null; return (<span key={id} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1">{cat.name} <X size={12} className="cursor-pointer hover:text-red-500" onClick={()=>setSelectedCats(selectedCats.filter(cid=>cid!==id))}/></span>); })}
+                           {selectedCats.map((id: any) => { const cat = categories.find((c: any) => String(c.id) === id); if (!cat) return null; return (<span key={id} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1">{cat.name} <X size={12} className="cursor-pointer hover:text-red-500" onClick={()=>setSelectedCats(selectedCats.filter(cid=>cid!==id))}/></span>); })}
                         </div>
                       )}
                     </div>

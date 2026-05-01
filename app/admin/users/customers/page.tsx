@@ -79,7 +79,7 @@ export default function AdminCustomersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium">
-            {customers.map(c => (
+            {customers.map((c: any) => (
               <tr key={c.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4 font-bold text-slate-900">{c.name}</td>
                 <td className="px-6 py-4 text-slate-600">{c.email}</td>

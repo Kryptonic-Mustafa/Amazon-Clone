@@ -49,7 +49,7 @@ export default function ProductDetailPage() {
           
           fetch('/api/shop/products').then(r=>r.json()).then(allData => {
             if (Array.isArray(allData)) {
-              setRelatedProducts(allData.filter(p => String(p.id) !== String(id)).slice(0, 10));
+              setRelatedProducts(allData.filter((p: any) => String(p.id) !== String(id)).slice(0, 10));
             }
           });
         }

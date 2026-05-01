@@ -38,8 +38,8 @@ export async function GET(req: Request) {
     let finalEntries = entries;
     if (userId && userId !== 'all') {
       const userOrders = await prisma.orders.findMany({ where: { is_active: true,  user_id: parseInt(userId) }, select: { id: true } });
-      const orderIds = userOrders.map(o => o.id);
-      finalEntries = entries.filter(e => e.type === 'INVOICE' && orderIds.includes(e.reference_id));
+      const orderIds = userOrders.map((o: any) => o.id);
+      finalEntries = entries.filter((e: any) => e.type === 'INVOICE' && orderIds.includes(e.reference_id));
     }
 
     return NextResponse.json({ entries: finalEntries, users }, { status: 200 });

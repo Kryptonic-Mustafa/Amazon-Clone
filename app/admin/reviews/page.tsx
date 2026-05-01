@@ -61,7 +61,7 @@ export default function AdminReviewsPage() {
           <tbody className="divide-y divide-slate-100 text-slate-800 font-medium">
             {reviews.length === 0 ? (
               <tr><td colSpan={8} className="p-8 text-center text-slate-500">No reviews found.</td></tr>
-            ) : reviews.map(r => (
+            ) : reviews.map((r: any) => (
               <tr key={r.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4 text-blue-600 font-bold">#{r.product_id}</td>
                 <td className="px-6 py-4">

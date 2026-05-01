@@ -71,7 +71,7 @@ export default function PurchaseOrdersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {pos.map(p => (
+            {pos.map((p: any) => (
               <tr key={p.id} className="hover:bg-slate-50">
                 <td className="px-6 py-4 font-bold text-orange-600">PO-{p.id}</td>
                 <td className="px-6 py-4 font-bold">{p.supplier_name}</td>

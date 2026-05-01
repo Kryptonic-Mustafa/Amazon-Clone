@@ -65,7 +65,7 @@ export default function ShopPage() {
         if (p.category_name === selectedCategory) return true;
         if (!p.category_ids) return false;
         const ids = String(p.category_ids).split(',').map((id: any) => id.trim());
-        const catObj = dbCategories.find(c => c.name === selectedCategory);
+        const catObj = dbCategories.find((c: any) => c.name === selectedCategory);
         return catObj ? ids.includes(String(catObj.id)) : false;
       });
     }

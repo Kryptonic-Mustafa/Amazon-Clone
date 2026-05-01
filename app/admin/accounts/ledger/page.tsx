@@ -45,7 +45,7 @@ export default function LedgerPage() {
 
   const exportCSV = () => {
     const headers = ['Date', 'Particulars', 'Vch Type', 'Vch No.', 'Debit', 'Credit', 'Balance'];
-    const rows = entries.map(e => [
+    const rows = entries.map((e: any) => [
       new Date(e.transaction_date).toLocaleDateString(),
       `"${e.description}"`,
       e.type,
@@ -55,7 +55,7 @@ export default function LedgerPage() {
       e.balance
     ]);
     
-    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
+    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map((e: any) => e.join(",")).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -97,7 +97,7 @@ export default function LedgerPage() {
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1"><Filter size={12}/> {t('Account / User')}</label>
             <select value={userId} onChange={e=>setUserId(e.target.value)} className="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white">
               <option value="all">{t('All Accounts (General)')}</option>
-              {users.map(u => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+              {users.map((u: any) => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
             </select>
           </div>
           <div className="w-[150px]">

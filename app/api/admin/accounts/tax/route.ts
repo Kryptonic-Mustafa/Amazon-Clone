@@ -30,13 +30,13 @@ export async function GET(req: Request) {
     const orders = await prisma.orders.findMany({ select: { id: true, user_id: true }});
 
     // Map user_id to invoices via orders table
-    let finalInvoices = invoices.map(inv => {
-       const order = orders.find(o => o.id === inv.order_id);
+    let finalInvoices = invoices.map((inv: any) => {
+       const order = orders.find((o: any) => o.id === inv.order_id);
        return { ...inv, user_id: order?.user_id || null };
     });
 
     if (userId && userId !== 'all') {
-       finalInvoices = finalInvoices.filter(inv => inv.user_id === parseInt(userId));
+       finalInvoices = finalInvoices.filter((inv: any) => inv.user_id === parseInt(userId));
     }
 
     return NextResponse.json({ entries: finalInvoices, users }, { status: 200 });

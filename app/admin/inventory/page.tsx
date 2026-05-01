@@ -57,7 +57,7 @@ export default function InventoryPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium">
-            {products.map(p => (
+            {products.map((p: any) => (
               <tr key={p.id} className="hover:bg-slate-50 transition-colors group">
                 <td className="px-6 py-3 flex items-center gap-3">
                   <img src={p.image_urls ? p.image_urls.split(',')[0] : '/placeholder.png'} className="w-10 h-10 object-contain bg-white border border-slate-200 rounded p-1" />

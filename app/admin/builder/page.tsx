@@ -149,7 +149,7 @@ export default function PageBuilder() {
 
   // 4. Update Block Content
   const updateBlockContent = (field: string, value: any) => {
-    setBlocks(blocks.map(b => b.id === selectedId ? { ...b, content: { ...b.content, [field]: value } } : b));
+    setBlocks(blocks.map((b: any) => b.id === selectedId ? { ...b, content: { ...b.content, [field]: value } } : b));
   };
 
   // 5. Save
@@ -166,7 +166,7 @@ export default function PageBuilder() {
     finally { setSaving(false); }
   };
 
-  const selectedBlock = blocks.find(b => b.id === selectedId);
+  const selectedBlock = blocks.find((b: any) => b.id === selectedId);
 
   return (
     <div className="text-black flex h-screen bg-slate-100 overflow-hidden font-sans text-slate-900">
@@ -242,7 +242,7 @@ export default function PageBuilder() {
                                     isSelected={block.id === selectedId}
                                     onClick={setSelectedId}
                                     onDelete={(id: string) => {
-                                        setBlocks(blocks.filter(b => b.id !== id));
+                                        setBlocks(blocks.filter((b: any) => b.id !== id));
                                         if(selectedId === id) setSelectedId(null);
                                     }}
                                 />

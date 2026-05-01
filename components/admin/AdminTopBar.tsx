@@ -55,7 +55,7 @@ export default function AdminTopBar() {
     e.stopPropagation();
     let newReadIds;
     if (readIds.includes(id)) {
-      newReadIds = readIds.filter(rid => rid !== id); 
+      newReadIds = readIds.filter((rid: any) => rid !== id); 
     } else {
       newReadIds = [...readIds, id]; 
     }
@@ -83,7 +83,7 @@ export default function AdminTopBar() {
     setIsLangOpen(false);
   };
 
-  const unreadCount = notifications.filter(n => !readIds.includes(n.id)).length;
+  const unreadCount = notifications.filter((n: any) => !readIds.includes(n.id)).length;
 
   return (
     <div className="h-20 bg-white border-b border-slate-200 shadow-sm flex items-center justify-end px-8 sticky top-0 z-40 print:hidden">

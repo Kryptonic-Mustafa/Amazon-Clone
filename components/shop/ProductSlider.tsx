@@ -48,7 +48,7 @@ export default function ProductSlider({ title, products, loading = false }: Prod
             </div>
           ))
         ) : products.length > 0 ? (
-          products.map(p => (
+          products.map((p: any) => (
             <div key={p.id} className="min-w-[280px] w-[280px] snap-start flex-shrink-0">
               <ProductCard product={p} />
             </div>

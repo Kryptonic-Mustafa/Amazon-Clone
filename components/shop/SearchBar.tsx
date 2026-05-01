@@ -59,7 +59,7 @@ export default function SearchBar() {
   // 4. Generate Autocomplete Suggestions
   useEffect(() => {
     if (query.trim().length > 0) {
-      const filtered = products.filter(p => 
+      const filtered = products.filter((p: any) => 
         p.name.toLowerCase().includes(query.toLowerCase()) || 
         (p.category_name && p.category_name.toLowerCase().includes(query.toLowerCase()))
       ).slice(0, 6); // Max 6 suggestions
@@ -74,7 +74,7 @@ export default function SearchBar() {
     if (!term.trim()) return;
     const key = user ? `recent_searches_${user.id}` : `recent_searches_guest`;
     // Keep max 5 recent searches, remove duplicates
-    const updated = [term, ...recentSearches.filter(s => s !== term)].slice(0, 5);
+    const updated = [term, ...recentSearches.filter((s: any) => s !== term)].slice(0, 5);
     setRecentSearches(updated);
     
     // Save format based on login state
@@ -85,7 +85,7 @@ export default function SearchBar() {
   const removeRecentSearch = (e: React.MouseEvent, term: string) => {
     e.stopPropagation();
     const key = user ? `recent_searches_${user.id}` : `recent_searches_guest`;
-    const updated = recentSearches.filter(s => s !== term);
+    const updated = recentSearches.filter((s: any) => s !== term);
     setRecentSearches(updated);
     
     const payload = user ? updated : { searches: updated, timestamp: Date.now() };

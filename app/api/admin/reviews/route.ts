@@ -7,14 +7,14 @@ export async function GET() {
     });
 
     // Fetch the products associated with these reviews to get Images and Names
-    const productIds = [...new Set(reviews.map(r => r.product_id))];
+    const productIds = [...new Set(reviews.map((r: any) => r.product_id))];
     const products = await prisma.products.findMany({ where: { is_active: true,  id: { in: productIds } },
       select: { id: true, name: true, image_urls: true }
     });
 
     // Enrich the reviews array with product data
-    const enrichedReviews = reviews.map(review => {
-      const product = products.find(p => p.id === review.product_id);
+    const enrichedReviews = reviews.map((review: any) => {
+      const product = products.find((p: any) => p.id === review.product_id);
       return {
         ...review,
         product_name: product?.name || 'Unknown Product',

@@ -31,7 +31,7 @@ export async function GET() {
       const dateStr = d.toISOString().split('T')[0];
       
       const dayTotal = orders
-        .filter(o => new Date(o.created_at).toISOString().split('T')[0] === dateStr)
+        .filter((o: any) => new Date(o.created_at).toISOString().split('T')[0] === dateStr)
         .reduce((sum, o) => sum + Number(o.total_amount), 0);
         
       chartData.push({

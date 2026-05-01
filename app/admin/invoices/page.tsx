@@ -44,7 +44,7 @@ export default function AdminInvoicesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium">
-            {invoices.map(invoice => (
+            {invoices.map((invoice: any) => (
               <tr key={invoice.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4 font-bold text-blue-600">{invoice.invoice_number}</td>
                 <td className="px-6 py-4 font-bold">#{formatNumber(invoice.order_id)}</td>

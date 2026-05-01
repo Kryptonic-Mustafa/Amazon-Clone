@@ -75,7 +75,7 @@ export default function QuotationsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {quotes.map(q => (
+            {quotes.map((q: any) => (
               <tr key={q.id} className="hover:bg-slate-50">
                 <td className="px-6 py-4 font-bold text-blue-600">QT-{q.id}</td>
                 <td className="px-6 py-4 font-bold">{q.customer_name} <span className="block text-xs text-slate-400 font-normal">{q.email}</span></td>

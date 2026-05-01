@@ -25,7 +25,7 @@ export default function NotificationModal() {
           {unreadOrders.length === 0 ? (
             <div className="p-8 text-center text-gray-500">No new notifications.</div>
           ) : (
-            unreadOrders.map(order => (
+            unreadOrders.map((order: any) => (
               <div key={order.id} className="p-4 border-b hover:bg-blue-50 transition-colors rounded-lg group">
                 <div className="flex justify-between items-start mb-1">
                   <span className="font-bold text-gray-800">Order #{order.id}</span>

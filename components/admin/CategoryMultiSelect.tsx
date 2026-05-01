@@ -33,13 +33,13 @@ export default function CategoryMultiSelect({ selectedIds, onChange }: Props) {
 
   const toggleCategory = (id: number) => {
     if (selectedIds.includes(id)) {
-      onChange(selectedIds.filter(cid => cid !== id));
+      onChange(selectedIds.filter((cid: any) => cid !== id));
     } else {
       onChange([...selectedIds, id]);
     }
   };
 
-  const filteredCats = categories.filter(c => 
+  const filteredCats = categories.filter((c: any) => 
     c.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -50,7 +50,7 @@ export default function CategoryMultiSelect({ selectedIds, onChange }: Props) {
       {/* 1. BADGES SECTION (Top) */}
       {selectedIds.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
-          {categories.filter(c => selectedIds.includes(c.id)).map(c => (
+          {categories.filter((c: any) => selectedIds.includes(c.id)).map((c: any) => (
             <span 
               key={c.id} 
               className="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 border border-blue-200"
@@ -101,7 +101,7 @@ export default function CategoryMultiSelect({ selectedIds, onChange }: Props) {
             {filteredCats.length === 0 ? (
               <p className="text-xs text-slate-400 p-3 text-center">No categories found.</p>
             ) : (
-              filteredCats.map(cat => {
+              filteredCats.map((cat: any) => {
                 const isSelected = selectedIds.includes(cat.id);
                 return (
                   <div 

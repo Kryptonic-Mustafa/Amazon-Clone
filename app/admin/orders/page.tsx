@@ -42,7 +42,7 @@ export default function AdminOrdersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium">
-            {orders.map(order => (
+            {orders.map((order: any) => (
               <tr key={order.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4 font-bold text-slate-900">#{formatNumber(order.id)}</td>
                 <td className="px-6 py-4 font-bold">{order.customer_name} <span className="block text-xs font-normal text-slate-400">{order.email}</span></td>

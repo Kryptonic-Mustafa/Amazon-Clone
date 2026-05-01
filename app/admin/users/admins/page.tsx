@@ -63,7 +63,7 @@ export default function AdminUsersPage() {
   };
 
   // 3. Filter Logic (Fixed duplicate error & mapped keys)
-  const filteredUsers = Array.isArray(users) ? users.filter(user => 
+  const filteredUsers = Array.isArray(users) ? users.filter((user: any) => 
     (user.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     (user.email?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   ) : [];
@@ -101,7 +101,7 @@ export default function AdminUsersPage() {
     if (!confirm('Are you sure you want to delete this admin?')) return;
     try {
       await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
-      setUsers(prev => prev.filter(user => user.id !== id));
+      setUsers(prev => prev.filter((user: any) => user.id !== id));
     } catch (error) {
       alert('Error deleting user');
     }

@@ -147,7 +147,7 @@ export default function PageManager() {
       <div className="text-black space-y-6">
         <h3 className="text-black font-bold text-lg">Edit Testimonials</h3>
         <div><label className="text-black font-bold block mb-2 block text-sm font-semibold">Title</label><input className="w-full border p-2 rounded" value={data.title||''} onChange={e=>updateForm('title',e.target.value)}/></div>
-        {[0, 1, 2].map(i => (
+        {[0, 1, 2].map((i: any) => (
             <div key={i} className="text-black p-4 border rounded bg-slate-50 space-y-2">
                 <div className="text-black font-bold text-xs text-blue-600">Customer {i+1}</div>
                 <div className="text-black grid grid-cols-2 gap-2">
@@ -191,7 +191,7 @@ export default function PageManager() {
       <div className="text-black w-1/4 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
         <div className="text-black p-4 border-b bg-slate-50"><h2 className="text-black font-bold flex items-center gap-2"><LayoutTemplate size={18}/> Sections</h2></div>
         <div className="text-black overflow-y-auto flex-1 p-2 space-y-1">
-            {loadingList ? <p className="text-black p-4 text-center">Loading...</p> : blocksMeta.map(block => (
+            {loadingList ? <p className="text-black p-4 text-center">Loading...</p> : blocksMeta.map((block: any) => (
                 <button key={block.section_name} onClick={() => setSelectedSection(block.section_name)} className={`w-full text-left px-4 py-3 rounded-lg transition-colors capitalize ${selectedSection === block.section_name ? 'bg-blue-50 text-blue-700 font-medium' : 'hover:bg-slate-50 text-slate-700'}`}>
                     {block.section_name.replace(/_/g, ' ')}
                 </button>

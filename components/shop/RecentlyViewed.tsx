@@ -21,7 +21,7 @@ export default function RecentlyViewed() {
               if (Array.isArray(data)) {
                 // Filter and sort according to the saved order
                 const recentlyViewedProducts = productIds
-                  .map(id => data.find(p => p.id === id))
+                  .map((id: any) => data.find((p: any) => p.id === id))
                   .filter(Boolean);
                 setProducts(recentlyViewedProducts);
               }
