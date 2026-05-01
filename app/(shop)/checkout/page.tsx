@@ -147,7 +147,7 @@ export default function CheckoutPage() {
               {buyNowItem && <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-full">Buy Now Mode</span>}
             </div>
             <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-              {checkoutItems.map((item) => (
+              {checkoutItems.map((item: any) => (
                 <div key={item.id} className="flex justify-between items-center group">
                   <div className="flex items-center gap-4">
                     <div className="relative">

@@ -25,7 +25,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
           <aside className="w-full md:w-64 flex-shrink-0">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <nav className="flex flex-col">
-                {menuItems.map((item) => {
+                {menuItems.map((item: any) => {
                   const isActive = pathname === item.href;
                   return (
                     <Link 

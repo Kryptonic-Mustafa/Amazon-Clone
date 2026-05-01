@@ -30,7 +30,7 @@ export default function ShopPage() {
       if (Array.isArray(catsData)) setDbCategories(catsData);
       if (Array.isArray(productsData)) {
         // Enrich products with category names from db
-        const enriched = productsData.map(p => {
+        const enriched = productsData.map((p: any) => {
           let catName = 'General';
           if (p.category_ids && Array.isArray(catsData)) {
             const firstId = String(p.category_ids).split(',')[0].trim();
@@ -51,7 +51,7 @@ export default function ShopPage() {
     // 1. Search Query Filter
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(p => 
+      result = result.filter((p: any) => 
         p.name.toLowerCase().includes(q) || 
         (p.category_name && p.category_name.toLowerCase().includes(q)) ||
         (p.brand && p.brand.toLowerCase().includes(q)) ||
@@ -61,21 +61,21 @@ export default function ShopPage() {
 
     // 2. Category Filter
     if (selectedCategory && selectedCategory !== 'All Products') {
-      result = result.filter(p => {
+      result = result.filter((p: any) => {
         if (p.category_name === selectedCategory) return true;
         if (!p.category_ids) return false;
-        const ids = String(p.category_ids).split(',').map(id => id.trim());
+        const ids = String(p.category_ids).split(',').map((id: any) => id.trim());
         const catObj = dbCategories.find(c => c.name === selectedCategory);
         return catObj ? ids.includes(String(catObj.id)) : false;
       });
     }
 
     // 3. Price Filter
-    result = result.filter(p => Number(p.price) <= maxPrice);
+    result = result.filter((p: any) => Number(p.price) <= maxPrice);
 
     // 4. Brand Filter
     if (selectedBrands.length > 0) {
-      result = result.filter(p => selectedBrands.includes(p.brand || 'Generic'));
+      result = result.filter((p: any) => selectedBrands.includes(p.brand || 'Generic'));
     }
 
     // 5. Sorting
@@ -94,8 +94,8 @@ export default function ShopPage() {
     setFilteredProducts(result);
   }, [allProducts, selectedCategory, maxPrice, selectedBrands, sortOption, searchQuery, dbCategories]);
 
-  const sidebarCategories = ['All Products', ...dbCategories.map(c => c.name)];
-  const brands = Array.from(new Set(allProducts.map(p => p.brand || 'Generic').filter(Boolean)));
+  const sidebarCategories = ['All Products', ...dbCategories.map((c: any) => c.name)];
+  const brands = Array.from(new Set(allProducts.map((p: any) => p.brand || 'Generic').filter(Boolean)));
 
   return (
     <main className="flex-grow container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
@@ -161,7 +161,7 @@ export default function ShopPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map(product => (
+            {filteredProducts.map((product: any) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>

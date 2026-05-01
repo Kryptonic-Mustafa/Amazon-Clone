@@ -57,7 +57,7 @@ export default function MyOrdersPage() {
           <p>You haven't placed any orders yet.</p>
         </div>
       ) : (
-        orders.map((order) => (
+        orders.map((order: any) => (
           <div key={order.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
             {/* Header */}
             <div className="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-gray-100">
