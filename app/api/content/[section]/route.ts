@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: Request, { params }: { params: { section: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ section: string }> }) {
+  const { section } = await params;
   const url = new URL(req.url);
   const lang = url.searchParams.get('lang') || 'en';
 
   try {
     const content = await prisma.pageContent.findUnique({
-      where: { section_key: params.section }
+      where: { section_key: section }
     });
 
     if (!content) {
@@ -19,7 +20,7 @@ export async function GET(req: Request, { params }: { params: { section: string 
     const data = lang === 'ar' ? content.content_ar : content.content_en;
     return NextResponse.json(data || {}, { status: 200 });
   } catch (error) {
-    console.error(`Content GET Error [${params.section}]:`, error);
+    console.error(`Content GET Error [${section}]:`, error);
     return NextResponse.json({ error: 'Failed to fetch content' }, { status: 500 });
   }
 }
