@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { FaSearch, FaHistory, FaTimes } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
+import { useShopFilter } from '@/context/ShopFilterContext';
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
@@ -15,6 +16,7 @@ export default function SearchBar() {
   
   const router = useRouter();
   const { user } = useAuth();
+  const { setSearchQuery } = useShopFilter();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // 1. Fetch products once for lightning-fast autocomplete
@@ -95,7 +97,8 @@ export default function SearchBar() {
     if (query.trim()) {
         saveRecentSearch(query.trim());
         setIsFocused(false);
-        router.push(`/shop?q=${encodeURIComponent(query.trim())}`);
+        setSearchQuery(query.trim());
+        router.push(`/shop`);
     }
   };
 
@@ -126,7 +129,7 @@ export default function SearchBar() {
               {recentSearches.map((term, i) => (
                 <div 
                   key={i} 
-                  onClick={() => { setQuery(term); saveRecentSearch(term); setIsFocused(false); router.push(`/shop?q=${encodeURIComponent(term)}`); }} 
+                  onClick={() => { setQuery(term); saveRecentSearch(term); setIsFocused(false); setSearchQuery(term); router.push(`/shop`); }} 
                   className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 >
                   <div className="flex items-center text-gray-700 gap-3">
@@ -145,7 +148,7 @@ export default function SearchBar() {
               {suggestions.length > 0 ? suggestions.map((p) => (
                 <div 
                   key={p.id} 
-                  onClick={() => { saveRecentSearch(query); setIsFocused(false); router.push(`/shop/${p.id}`); }} 
+                  onClick={() => { saveRecentSearch(p.name); setQuery(p.name); setIsFocused(false); setSearchQuery(p.name); router.push(`/shop`); }} 
                   className="flex items-center gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 >
                   <div className="w-10 h-10 relative flex-shrink-0 bg-white border border-gray-100 rounded overflow-hidden">

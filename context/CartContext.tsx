@@ -61,8 +61,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   // --- Actions ---
 
   const addToCart = (product: any) => {
-    toast.success("Added to cart");
-    
     // If user adds to cart, we ensure we aren't in "Buy Now" mode anymore
     setBuyNowItem(null); 
 

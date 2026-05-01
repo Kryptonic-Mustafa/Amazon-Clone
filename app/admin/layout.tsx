@@ -1,29 +1,22 @@
-"use client";
-
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { usePathname } from "next/navigation";
-import { AdminNotificationProvider } from "@/context/AdminNotificationContext"; // Import Provider
+import AdminTopBar from "@/components/admin/AdminTopBar";
+import { AdminNotificationProvider } from "@/context/AdminNotificationContext";
+import { AdminLocaleProvider } from "@/context/AdminLocaleContext";
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const pathname = usePathname();
-  const isLoginPage = pathname === "/admin/login";
-
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Conditionally Render Sidebar */}
-      {!isLoginPage && <AdminSidebar />}
-
-      {/* Adjust margin based on whether sidebar is present */}
-      <main className={`flex-1 p-8 ${!isLoginPage ? "ml-64" : "ml-0 p-0"}`}>
-        {/* WRAP CHILDREN WITH NOTIFICATION PROVIDER */}
-        <AdminNotificationProvider>
-           {children}
-        </AdminNotificationProvider>
-      </main>
-    </div>
+    <AdminLocaleProvider>
+      <AdminNotificationProvider>
+        <div className="flex min-h-screen bg-slate-50 font-sans">
+          <AdminSidebar />
+          <div className="flex-1 ltr:ml-64 rtl:mr-64 print:ml-0 print:mr-0 flex flex-col min-h-screen transition-all">
+            <AdminTopBar />
+            <main className="flex-1">
+              {children}
+            </main>
+          </div>
+        </div>
+      </AdminNotificationProvider>
+    </AdminLocaleProvider>
   );
 }

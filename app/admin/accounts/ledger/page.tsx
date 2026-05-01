@@ -1,131 +1,180 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { DollarSign, ArrowDownLeft, ArrowUpRight, Loader2, Info, FileText } from 'lucide-react';
+import { apiCall } from '@/lib/apiClient';
+import { BookOpen, Printer, Download, Filter, Hash } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { useAdminLocale } from '@/context/AdminLocaleContext';
 
 export default function LedgerPage() {
-  const [ledger, setLedger] = useState<any[]>([]);
-  const [totals, setTotals] = useState({ debit: 0, credit: 0 });
+  const searchParams = useSearchParams();
+  const urlUserId = searchParams.get('userId') || 'all';
+  const urlOrderId = searchParams.get('orderId') || 'all';
+
+  const [entries, setEntries] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch('/api/admin/accounts/ledger')
-      .then(r => r.json())
-      .then(data => {
-         if(data.transactions) setLedger(data.transactions);
-         if(data.totals) setTotals(data.totals);
-      })
-      .catch(err => console.error("Ledger fetch error:", err))
-      .finally(() => setLoading(false));
-  }, []);
+  // Filters
+  const [userId, setUserId] = useState(urlUserId);
+  const [orderId, setOrderId] = useState(urlOrderId);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  const { t, formatCurrency, formatNumber, locale } = useAdminLocale();
+
+  const fetchLedger = async () => {
+    setLoading(true);
+    let url = `/api/admin/accounts/ledger?userId=${userId}&orderId=${orderId}`;
+    if (startDate) url += `&startDate=${startDate}`;
+    if (endDate) url += `&endDate=${endDate}`;
+    
+    const data = await apiCall(url);
+    if (data) {
+      setEntries(data.entries || []);
+      setUsers(data.users || []);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchLedger(); }, [userId, orderId, startDate, endDate]);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const exportCSV = () => {
+    const headers = ['Date', 'Particulars', 'Vch Type', 'Vch No.', 'Debit', 'Credit', 'Balance'];
+    const rows = entries.map(e => [
+      new Date(e.transaction_date).toLocaleDateString(),
+      `"${e.description}"`,
+      e.type,
+      e.reference_id,
+      e.debit,
+      e.credit,
+      e.balance
+    ]);
+    
+    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Ledger_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const totalDebit = entries.reduce((sum, e) => sum + Number(e.debit || 0), 0);
+  const totalCredit = entries.reduce((sum, e) => sum + Number(e.credit || 0), 0);
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
-      {/* Page Title */}
-      <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-            <DollarSign size={24} />
-        </div>
-        Financial Ledger
-      </h1>
+    <div className="p-4 md:p-8 bg-slate-50 min-h-screen text-slate-900 print:bg-white print:p-0">
       
-      {/* --- STATS CARDS --- */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Debit Card (Red) */}
-        <div className="bg-white p-6 rounded-xl border border-red-100 shadow-sm relative overflow-hidden">
-            <div className="relative z-10">
-                <div className="text-sm font-semibold text-slate-500 mb-1">Total Invoiced (Debit)</div>
-                <div className="text-3xl font-bold text-red-600 flex items-center gap-2">
-                    ${totals.debit.toFixed(2)}
-                </div>
+      {/* HEADER & CONTROLS (Hidden on Print) */}
+      <div className="print:hidden">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-600 p-2.5 rounded-lg text-white shadow-sm"><BookOpen size={24} /></div>
+            <div>
+                <h1 className="text-2xl font-black tracking-tight leading-none">General Ledger</h1>
+                <p className="text-sm text-slate-500 font-medium">Statement of Accounts</p>
             </div>
-            <div className="absolute right-4 top-4 p-2 bg-red-50 rounded-full text-red-500">
-                <ArrowDownLeft size={20} />
-            </div>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={exportCSV} className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-sm transition-colors text-sm">
+              <Download size={16}/> Export CSV
+            </button>
+            <button onClick={handlePrint} className="bg-slate-900 text-white hover:bg-slate-800 px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-sm transition-colors text-sm">
+              <Printer size={16}/> Print Report
+            </button>
+          </div>
         </div>
 
-        {/* Credit Card (Green) */}
-        <div className="bg-white p-6 rounded-xl border border-green-100 shadow-sm relative overflow-hidden">
-            <div className="relative z-10">
-                <div className="text-sm font-semibold text-slate-500 mb-1">Total Received (Credit)</div>
-                <div className="text-3xl font-bold text-green-600 flex items-center gap-2">
-                    ${totals.credit.toFixed(2)}
-                </div>
-            </div>
-            <div className="absolute right-4 top-4 p-2 bg-green-50 rounded-full text-green-500">
-                <ArrowUpRight size={20} />
-            </div>
-        </div>
-
-        {/* Balance Card (Blue) */}
-        <div className="bg-white p-6 rounded-xl border border-blue-100 shadow-sm relative overflow-hidden">
-            <div className="relative z-10">
-                <div className="text-sm font-semibold text-slate-500 mb-1">Balance Due</div>
-                <div className="text-3xl font-bold text-blue-600 flex items-center gap-2">
-                    ${(totals.debit - totals.credit).toFixed(2)}
-                </div>
-            </div>
-            <div className="absolute right-4 top-4 p-2 bg-blue-50 rounded-full text-blue-500">
-                <FileText size={20} />
-            </div>
+        {/* FILTERS */}
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1"><Filter size={12}/> {t('Account / User')}</label>
+            <select value={userId} onChange={e=>setUserId(e.target.value)} className="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white">
+              <option value="all">{t('All Accounts (General)')}</option>
+              {users.map(u => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+            </select>
+          </div>
+          <div className="w-[150px]">
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1"><Hash size={12}/> {t('Order ID')}</label>
+            <input 
+              type="text" 
+              placeholder={t('All')} 
+              value={orderId === 'all' ? '' : orderId} 
+              onChange={e => setOrderId(e.target.value || 'all')} 
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium" 
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('Period From')}</label>
+            <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('Period To')}</label>
+            <input type="date" value={endDate} onChange={e=>setEndDate(e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium" />
+          </div>
+          <button onClick={() => {setUserId('all'); setOrderId('all'); setStartDate(''); setEndDate('');}} className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">{t('Clear')}</button>
         </div>
       </div>
 
-      {/* --- LEDGER TABLE --- */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
-        <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200">
+      {/* PRINTABLE LEDGER TABLE */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-300 overflow-hidden print:shadow-none print:border-none">
+        
+        {/* Print Header */}
+        <div className="hidden print:block text-center mb-6 border-b-2 border-slate-900 pb-4">
+            <h1 className="text-2xl font-black uppercase tracking-widest">General Ledger Statement</h1>
+            <p className="text-sm font-medium mt-1">Period: {startDate ? new Date(startDate).toLocaleDateString() : 'Beginning'} to {endDate ? new Date(endDate).toLocaleDateString() : 'Present'}</p>
+        </div>
+
+        {loading ? (
+          <div className="p-12 text-center text-slate-500 font-bold animate-pulse">Fetching records...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm font-medium text-slate-800">
+              <thead className="bg-slate-100 border-b-2 border-slate-300">
                 <tr>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/3">Description</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Debit</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Credit</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Balance</th>
+                  <th className="px-4 py-3 font-bold text-left border-r border-slate-200 w-[120px]">Date</th>
+                  <th className="px-4 py-3 font-bold text-left border-r border-slate-200">Particulars</th>
+                  <th className="px-4 py-3 font-bold text-left border-r border-slate-200 w-[100px]">Vch Type</th>
+                  <th className="px-4 py-3 font-bold text-left border-r border-slate-200 w-[100px]">Vch No.</th>
+                  <th className="px-4 py-3 font-bold text-right border-r border-slate-200 w-[120px]">Debit</th>
+                  <th className="px-4 py-3 font-bold text-right border-r border-slate-200 w-[120px]">Credit</th>
+                  <th className="px-4 py-3 font-bold text-right w-[120px]">Balance</th>
                 </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-                {loading ? (
-                    <tr>
-                        <td colSpan={5} className="p-20 text-center">
-                            <Loader2 className="animate-spin mx-auto text-blue-600" size={32}/>
-                            <p className="text-slate-400 mt-2 text-sm">Loading transactions...</p>
-                        </td>
-                    </tr>
-                ) : ledger.length === 0 ? (
-                    <tr>
-                        <td colSpan={5} className="p-20 text-center text-slate-400 flex flex-col items-center gap-3">
-                            <div className="p-4 bg-slate-50 rounded-full">
-                                <Info size={32} className="text-slate-300"/>
-                            </div>
-                            <p>No transactions found.</p>
-                            <p className="text-xs">Generate an invoice from Orders to start seeing data here.</p>
-                        </td>
-                    </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 font-mono text-xs">
+                {entries.length === 0 ? (
+                  <tr><td colSpan={7} className="p-8 text-center text-slate-500 font-sans">No transactions found for the selected criteria.</td></tr>
                 ) : (
-                    ledger.map(entry => (
-                        <tr key={entry.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-6 py-4 text-sm font-medium text-slate-600">
-                                {new Date(entry.transaction_date).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-slate-800">
-                                <div className="font-medium">{entry.description}</div>
-                                <div className="text-xs text-slate-400 mt-0.5 uppercase tracking-wide">{entry.type}</div>
-                            </td>
-                            <td className="px-6 py-4 text-right font-mono font-medium text-red-600">
-                                {Number(entry.debit) > 0 ? `$${Number(entry.debit).toFixed(2)}` : <span className="text-slate-300">-</span>}
-                            </td>
-                            <td className="px-6 py-4 text-right font-mono font-medium text-green-600">
-                                {Number(entry.credit) > 0 ? `$${Number(entry.credit).toFixed(2)}` : <span className="text-slate-300">-</span>}
-                            </td>
-                            <td className="px-6 py-4 text-right font-mono font-bold text-slate-700 bg-slate-50/50">
-                                ${Number(entry.balance).toFixed(2)}
-                            </td>
-                        </tr>
-                    ))
+                  entries.map((entry, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="px-4 py-2.5 border-r border-slate-200 text-slate-500">{new Date(entry.transaction_date).toLocaleDateString('en-GB')}</td>
+                      <td className="px-4 py-2.5 border-r border-slate-200 font-sans text-sm font-semibold">{entry.description}</td>
+                      <td className="px-4 py-2.5 border-r border-slate-200 text-slate-500">{entry.type}</td>
+                      <td className="px-4 py-2.5 border-r border-slate-200 text-blue-600 font-bold">{entry.reference_id || '-'}</td>
+                      <td className="px-4 py-2.5 border-r border-slate-200 text-right">{Number(entry.debit) > 0 ? Number(entry.debit).toFixed(2) : ''}</td>
+                      <td className="px-4 py-2.5 border-r border-slate-200 text-right">{Number(entry.credit) > 0 ? Number(entry.credit).toFixed(2) : ''}</td>
+                      <td className="px-4 py-2.5 text-right font-bold text-slate-900">{Number(entry.balance).toFixed(2)}</td>
+                    </tr>
+                  ))
                 )}
-            </tbody>
-        </table>
+              </tbody>
+              <tfoot className="bg-slate-50 border-t-2 border-slate-400 font-mono text-xs">
+                <tr>
+                    <td colSpan={4} className="px-4 py-3 font-black text-right border-r border-slate-200 uppercase font-sans text-sm">Closing Totals</td>
+                    <td className="px-4 py-3 font-black text-right border-r border-slate-200">{totalDebit.toFixed(2)}</td>
+                    <td className="px-4 py-3 font-black text-right border-r border-slate-200">{totalCredit.toFixed(2)}</td>
+                    <td className="px-4 py-3 font-black text-right text-blue-600 bg-blue-50">{(totalDebit - totalCredit).toFixed(2)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

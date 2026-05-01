@@ -2,13 +2,16 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, RotateCcw } from 'lucide-react';
+import { useShopFilter } from '@/context/ShopFilterContext';
 
-export default function FilterSidebar({
-  categories, selectedCategory, setSelectedCategory,
-  maxPrice, setMaxPrice,
-  brands, selectedBrands, setSelectedBrands
-}: any) {
+export default function FilterSidebar({ categories, brands }: { categories: string[], brands: string[] }) {
+  const { 
+    selectedCategory, setSelectedCategory, 
+    maxPrice, setMaxPrice, 
+    selectedBrands, setSelectedBrands,
+    clearFilters
+  } = useShopFilter();
   
   const handleBrandToggle = (brand: string) => {
     if (selectedBrands.includes(brand)) {
@@ -19,12 +22,12 @@ export default function FilterSidebar({
   };
 
   return (
-    // Changed 'top-24' to 'top-8' to remove the massive gap above the sidebar
     <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-6 sticky top-8 z-20">
       
       {/* Back to Home Button */}
       <Link 
         href="/" 
+        onClick={clearFilters}
         className="flex items-center gap-2 text-slate-700 hover:text-blue-700 font-bold transition-all w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 shadow-sm group"
       >
          <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform text-slate-500 group-hover:text-blue-600" /> 
@@ -34,12 +37,12 @@ export default function FilterSidebar({
       {/* Categories */}
       <div>
         <h3 className="text-sm font-black text-blue-600 mb-3 tracking-widest uppercase">Categories</h3>
-        <div className="space-y-1 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+        <div className="space-y-1 max-h-64 overflow-y-auto pr-2 custom-scrollbar text-xs">
           {categories.map((cat: string) => (
             <button 
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`block w-full text-left text-sm py-2 px-3 rounded-lg transition-all font-medium ${
+              className={`block w-full text-left py-2 px-3 rounded-lg transition-all font-medium ${
                 selectedCategory === cat 
                 ? 'bg-slate-900 text-white shadow-md' 
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -70,7 +73,7 @@ export default function FilterSidebar({
           onChange={(e) => setMaxPrice(Number(e.target.value))}
           className="w-full accent-slate-900 cursor-pointer h-2 bg-slate-200 rounded-lg appearance-none"
         />
-        <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium">
+        <div className="flex justify-between text-[10px] text-slate-400 mt-2 font-medium">
             <span>$0</span>
             <span>$5000+</span>
         </div>
@@ -90,7 +93,7 @@ export default function FilterSidebar({
                 onChange={() => handleBrandToggle(brand)}
                 className="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
               />
-              <span className={`text-sm transition-colors font-medium ${
+              <span className={`text-xs transition-colors font-medium ${
                   selectedBrands.includes(brand) ? 'text-slate-900' : 'text-slate-500 group-hover:text-slate-900'
               }`}>
                   {brand}
@@ -99,6 +102,16 @@ export default function FilterSidebar({
           ))}
         </div>
       </div>
+
+      <hr className="border-slate-100" />
+
+      {/* Clear Filters Button */}
+      <button 
+        onClick={clearFilters}
+        className="w-full flex items-center justify-center gap-2 py-3 border-2 border-slate-900 text-slate-900 rounded-xl font-bold hover:bg-slate-900 hover:text-white transition-all active:scale-95 text-sm"
+      >
+        <RotateCcw size={16} /> Reset Filters
+      </button>
 
     </div>
   );

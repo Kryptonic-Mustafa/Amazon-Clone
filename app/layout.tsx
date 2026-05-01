@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import NextTopLoader from 'nextjs-toploader';
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
+import { ShopFilterProvider } from "@/context/ShopFilterContext";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -20,12 +23,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <NextTopLoader color="#eab308" height={3} showSpinner={false} />
         {/* WRAP EVERYTHING HERE */}
         <AuthProvider>
-          <CartProvider>
-            <Toaster position="top-center" />
-            {children}
-          </CartProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <ShopFilterProvider>
+                <Toaster position="top-center" />
+                {children}
+              </ShopFilterProvider>
+            </CartProvider>
+          </WishlistProvider>
         </AuthProvider>
       </body>
     </html>

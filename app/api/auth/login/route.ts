@@ -1,53 +1,45 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db'; // <--- FIXED: Named import with brackets { }
+import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { cookies } from 'next/headers';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this';
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-this-in-production';
 
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
-    // 1. Check User
-    // Note: ensure your table name matches (users vs user). Based on previous steps, it is 'users'
-    const [users]: any = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-    
-    if (users.length === 0) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
-    }
-    
-    const user = users[0];
-
-    // 2. Check Password
-    const isValid = await bcrypt.compare(password, user.password_hash);
-    if (!isValid) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
-    // 3. Create Session Token
+    // 1. Find user in TiDB
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    }
+
+    // 2. Verify hashed password (assuming passwords in DB are bcrypt hashed)
+    // NOTE: If your current DB passwords are raw text, we will need to hash them first!
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash || '');
+    if (!isPasswordValid) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    }
+
+    // 3. Generate secure JWT Token
     const token = jwt.sign(
-      { id: user.id, email: user.email, name: user.name, role: user.role_ids },
+      { userId: user.id, email: user.email, role: 'customer' },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    // 4. Set Cookie
-    const cookieStore = await cookies();
-    cookieStore.set('shop_token', token, { 
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: '/' 
-    });
+    // 4. Return user data (excluding password)
+    const { password_hash, ...safeUser } = user;
+    
+    return NextResponse.json({ user: safeUser, token }, { status: 200 });
 
-    // Remove password from response
-    const { password_hash, ...userWithoutPass } = user;
-    return NextResponse.json({ user: userWithoutPass });
-
-  } catch (error: any) {
+  } catch (error) {
     console.error("Login Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

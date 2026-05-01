@@ -75,7 +75,7 @@ const MatrixBackground = ({ isTyping }: { isTyping: boolean }) => {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 z-0 pointer-events-none opacity-40"
+      className="text-black absolute inset-0 z-0 pointer-events-none opacity-40"
     />
   );
 };
@@ -94,7 +94,7 @@ const CustomCursor = () => {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 w-8 h-8 border-2 border-blue-500 rounded-full pointer-events-none z-50 mix-blend-difference"
+      className="text-black fixed top-0 left-0 w-8 h-8 border-2 border-blue-500 rounded-full pointer-events-none z-50 mix-blend-difference"
       animate={{ x: mousePos.x - 16, y: mousePos.y - 16 }}
       transition={{ type: "spring", stiffness: 500, damping: 28, mass: 0.5 }}
     />
@@ -150,7 +150,7 @@ export default function AdminLoginPage() {
 
   return (
     // fixed inset-0 ensures full screen coverage with NO scrolling
-    <div className="fixed inset-0 bg-black flex items-center justify-center overflow-hidden font-sans m-0 p-0">
+    <div className="text-black fixed inset-0 bg-black flex items-center justify-center overflow-hidden font-sans m-0 p-0">
       
       <CustomCursor />
       <MatrixBackground isTyping={isTyping} />
@@ -160,49 +160,49 @@ export default function AdminLoginPage() {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-sm p-8 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl"
+        className="text-black relative z-10 w-full max-w-sm p-8 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl"
       >
         {/* Decorative Glows */}
         <div className={`absolute -top-20 -left-20 w-40 h-40 bg-blue-500/30 rounded-full blur-3xl transition-all duration-300 ${isTyping ? "scale-125 opacity-60" : "scale-100 opacity-20"}`} />
         <div className={`absolute -bottom-20 -right-20 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl transition-all duration-300 ${isTyping ? "scale-125 opacity-60" : "scale-100 opacity-20"}`} />
 
-        <div className="mb-6 text-center relative">
-          <h1 className="text-3xl font-bold text-white tracking-tight mb-1">
+        <div className="text-black mb-6 text-center relative">
+          <h1 className="text-black text-3xl font-bold text-white tracking-tight mb-1">
             System Access
           </h1>
-          <p className="text-slate-400 text-xs uppercase tracking-widest">Identify Yourself</p>
+          <p className="text-black text-slate-400 text-xs uppercase tracking-widest">Identify Yourself</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-5 relative">
+        <form onSubmit={handleLogin} className="text-black space-y-5 relative">
           
           {/* Email Input */}
-          <div className="relative group">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors" size={18} />
+          <div className="text-black relative group">
+            <Mail className="text-black absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors" size={18} />
             <input
               type="email"
               required
-              className="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white text-sm placeholder-transparent focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all peer"
+              className="text-black w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white text-sm placeholder-transparent focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all peer"
               placeholder="Email"
               value={email}
               onChange={(e) => handleInput(setEmail, e.target.value)}
             />
-            <label className="absolute left-10 top-1/2 -translate-y-1/2 text-slate-500 text-sm transition-all peer-focus:-top-2 peer-focus:left-2 peer-focus:text-[10px] peer-focus:text-blue-400 peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-2 peer-[:not(:placeholder-shown)]:text-[10px] pointer-events-none">
+            <label className="text-black font-bold block mb-2 absolute left-10 top-1/2 -translate-y-1/2 text-slate-500 text-sm transition-all peer-focus:-top-2 peer-focus:left-2 peer-focus:text-[10px] peer-focus:text-blue-400 peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-2 peer-[:not(:placeholder-shown)]:text-[10px] pointer-events-none">
               User ID
             </label>
           </div>
 
           {/* Password Input */}
-          <div className="relative group">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors" size={18} />
+          <div className="text-black relative group">
+            <Lock className="text-black absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors" size={18} />
             <input
               type="password"
               required
-              className="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white text-sm placeholder-transparent focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all peer"
+              className="text-black w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white text-sm placeholder-transparent focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all peer"
               placeholder="Password"
               value={password}
               onChange={(e) => handleInput(setPassword, e.target.value)}
             />
-            <label className="absolute left-10 top-1/2 -translate-y-1/2 text-slate-500 text-sm transition-all peer-focus:-top-2 peer-focus:left-2 peer-focus:text-[10px] peer-focus:text-blue-400 peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-2 peer-[:not(:placeholder-shown)]:text-[10px] pointer-events-none">
+            <label className="text-black font-bold block mb-2 absolute left-10 top-1/2 -translate-y-1/2 text-slate-500 text-sm transition-all peer-focus:-top-2 peer-focus:left-2 peer-focus:text-[10px] peer-focus:text-blue-400 peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-2 peer-[:not(:placeholder-shown)]:text-[10px] pointer-events-none">
               Passcode
             </label>
           </div>
@@ -213,22 +213,22 @@ export default function AdminLoginPage() {
             disabled={loading}
             className="w-full relative overflow-hidden bg-white text-black font-bold py-3 rounded-lg hover:bg-blue-50 transition-all active:scale-[0.98] mt-2 group"
           >
-            <div className="relative flex items-center justify-center gap-2 text-sm">
+            <div className="text-black relative flex items-center justify-center gap-2 text-sm">
               {loading ? (
                 <>
-                  <Loader2 className="animate-spin" size={16} /> Verifying...
+                  <Loader2 className="text-black animate-spin" size={16} /> Verifying...
                 </>
               ) : (
                 <>
-                  Connect <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                  Connect <ArrowRight size={16} className="text-black group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </div>
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-             <span className="text-[10px] text-slate-600 tracking-widest">ENCRYPTED // V.2.0.4</span>
+        <div className="text-black mt-6 text-center">
+             <span className="text-black text-[10px] text-slate-600 tracking-widest">ENCRYPTED // V.2.0.4</span>
         </div>
       </motion.div>
     </div>

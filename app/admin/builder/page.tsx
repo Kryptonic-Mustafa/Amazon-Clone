@@ -48,7 +48,7 @@ function SortableItem({ block, isSelected, onClick, onDelete }: any) {
     <div 
       ref={setNodeRef} 
       style={style} 
-      className="relative mb-4 group"
+      className="text-black relative mb-4 group"
     >
       {/* The Bubble Card */}
       <div 
@@ -62,22 +62,22 @@ function SortableItem({ block, isSelected, onClick, onDelete }: any) {
         <div 
           {...attributes} 
           {...listeners}
-          className="w-10 bg-slate-50 border-r border-slate-100 flex items-center justify-center cursor-grab active:cursor-grabbing hover:bg-slate-100 transition-colors"
+          className="text-black w-10 bg-slate-50 border-r border-slate-100 flex items-center justify-center cursor-grab active:cursor-grabbing hover:bg-slate-100 transition-colors"
         >
-          <GripVertical size={20} className="text-slate-400" />
+          <GripVertical size={20} className="text-black text-slate-400" />
         </div>
 
         {/* PREVIEW CONTENT ZONE */}
-        <div className="flex-1 p-4 cursor-pointer min-h-[100px] flex flex-col justify-center pointer-events-none">
+        <div className="text-black flex-1 p-4 cursor-pointer min-h-[100px] flex flex-col justify-center pointer-events-none">
            {/* Block Type Label */}
-           <div className="mb-2">
-             <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 px-2 py-1 rounded-full">
+           <div className="text-black mb-2">
+             <span className="text-black text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 px-2 py-1 rounded-full">
                {block.type} Section
              </span>
            </div>
            
            {/* Actual Component Preview (Scaled Down) */}
-           <div className="opacity-80 scale-95 origin-left">
+           <div className="text-black opacity-80 scale-95 origin-left">
               <BlockRenderer block={block} />
            </div>
         </div>
@@ -85,7 +85,7 @@ function SortableItem({ block, isSelected, onClick, onDelete }: any) {
         {/* DELETE BUTTON (Top Right) */}
         <button 
           onClick={(e) => { e.stopPropagation(); onDelete(block.id); }} 
-          className="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur rounded-lg border border-slate-200 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-all opacity-0 group-hover:opacity-100 shadow-sm z-10"
+          className="text-black absolute top-2 right-2 p-2 bg-white/90 backdrop-blur rounded-lg border border-slate-200 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-all opacity-0 group-hover:opacity-100 shadow-sm z-10"
         >
           <Trash2 size={16} />
         </button>
@@ -169,68 +169,68 @@ export default function PageBuilder() {
   const selectedBlock = blocks.find(b => b.id === selectedId);
 
   return (
-    <div className="flex h-screen bg-slate-100 overflow-hidden font-sans text-slate-900">
+    <div className="text-black flex h-screen bg-slate-100 overflow-hidden font-sans text-slate-900">
       
       {/* --- LEFT SIDEBAR: TOOLBOX --- */}
-      <div className="w-72 bg-white border-r border-slate-200 flex flex-col shadow-xl z-20">
-        <div className="p-5 border-b border-slate-100">
-            <h2 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-                <Layout className="text-blue-600" /> Toolbox
+      <div className="text-black w-72 bg-white border-r border-slate-200 flex flex-col shadow-xl z-20">
+        <div className="text-black p-5 border-b border-slate-100">
+            <h2 className="text-black font-bold text-lg text-slate-800 flex items-center gap-2">
+                <Layout className="text-black text-blue-600" /> Toolbox
             </h2>
-            <p className="text-xs text-slate-400 mt-1">Click to add sections</p>
+            <p className="text-black text-xs text-slate-400 mt-1">Click to add sections</p>
         </div>
         
-        <div className="p-4 space-y-3 overflow-y-auto flex-1">
-          <button onClick={() => addBlock('hero')} className="w-full flex items-center gap-3 p-4 bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md hover:text-blue-600 rounded-xl transition-all group text-left">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors"><Layout size={20} /></div>
-            <div><div className="font-semibold text-sm">Hero Banner</div><div className="text-xs text-slate-400">Large top section</div></div>
+        <div className="text-black p-4 space-y-3 overflow-y-auto flex-1">
+          <button onClick={() => addBlock('hero')} className="text-black w-full flex items-center gap-3 p-4 bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md hover:text-blue-600 rounded-xl transition-all group text-left">
+            <div className="text-black p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors"><Layout size={20} /></div>
+            <div><div className="text-black font-semibold text-sm">Hero Banner</div><div className="text-black text-xs text-slate-400">Large top section</div></div>
           </button>
 
-          <button onClick={() => addBlock('text')} className="w-full flex items-center gap-3 p-4 bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md hover:text-blue-600 rounded-xl transition-all group text-left">
-            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors"><Type size={20} /></div>
-            <div><div className="font-semibold text-sm">Text Block</div><div className="text-xs text-slate-400">HTML / Paragraphs</div></div>
+          <button onClick={() => addBlock('text')} className="text-black w-full flex items-center gap-3 p-4 bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md hover:text-blue-600 rounded-xl transition-all group text-left">
+            <div className="text-black p-2 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors"><Type size={20} /></div>
+            <div><div className="text-black font-semibold text-sm">Text Block</div><div className="text-black text-xs text-slate-400">HTML / Paragraphs</div></div>
           </button>
 
-          <button onClick={() => addBlock('image')} className="w-full flex items-center gap-3 p-4 bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md hover:text-blue-600 rounded-xl transition-all group text-left">
-            <div className="p-2 bg-green-50 text-green-600 rounded-lg group-hover:bg-green-600 group-hover:text-white transition-colors"><ImageIcon size={20} /></div>
-            <div><div className="font-semibold text-sm">Full Image</div><div className="text-xs text-slate-400">Banner / Photo</div></div>
+          <button onClick={() => addBlock('image')} className="text-black w-full flex items-center gap-3 p-4 bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md hover:text-blue-600 rounded-xl transition-all group text-left">
+            <div className="text-black p-2 bg-green-50 text-green-600 rounded-lg group-hover:bg-green-600 group-hover:text-white transition-colors"><ImageIcon size={20} /></div>
+            <div><div className="text-black font-semibold text-sm">Full Image</div><div className="text-black text-xs text-slate-400">Banner / Photo</div></div>
           </button>
 
-          <button onClick={() => addBlock('features')} className="w-full flex items-center gap-3 p-4 bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md hover:text-blue-600 rounded-xl transition-all group text-left">
-            <div className="p-2 bg-orange-50 text-orange-600 rounded-lg group-hover:bg-orange-600 group-hover:text-white transition-colors"><List size={20} /></div>
-            <div><div className="font-semibold text-sm">Features Grid</div><div className="text-xs text-slate-400">3 Column List</div></div>
+          <button onClick={() => addBlock('features')} className="text-black w-full flex items-center gap-3 p-4 bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md hover:text-blue-600 rounded-xl transition-all group text-left">
+            <div className="text-black p-2 bg-orange-50 text-orange-600 rounded-lg group-hover:bg-orange-600 group-hover:text-white transition-colors"><List size={20} /></div>
+            <div><div className="text-black font-semibold text-sm">Features Grid</div><div className="text-black text-xs text-slate-400">3 Column List</div></div>
           </button>
         </div>
 
-        <div className="p-4 border-t bg-slate-50">
-            <button onClick={handleSave} className="w-full bg-slate-900 text-white py-3.5 rounded-xl font-bold hover:bg-slate-800 flex justify-center items-center gap-2 shadow-lg hover:shadow-xl transition-all active:scale-95">
+        <div className="text-black p-4 border-t bg-slate-50">
+            <button onClick={handleSave} className="text-black w-full bg-slate-900 text-white py-3.5 rounded-xl font-bold hover:bg-slate-800 flex justify-center items-center gap-2 shadow-lg hover:shadow-xl transition-all active:scale-95">
                 {saving ? 'Saving...' : <><Save size={18}/> Save Page Layout</>}
             </button>
         </div>
       </div>
 
       {/* --- CENTER: CANVAS ZONE --- */}
-      <div id="canvas-container" className="flex-1 overflow-y-auto bg-slate-100/50 p-8 scroll-smooth">
-        <div className="max-w-4xl mx-auto">
+      <div id="canvas-container" className="text-black flex-1 overflow-y-auto bg-slate-100/50 p-8 scroll-smooth">
+        <div className="text-black max-w-4xl mx-auto">
             
             {/* Header */}
-            <div className="mb-6 flex justify-between items-center">
+            <div className="text-black mb-6 flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800">Page Canvas</h1>
-                    <p className="text-sm text-slate-500">Drag items to reorder • Click to edit properties</p>
+                    <h1 className="text-black text-2xl font-bold text-slate-800">Page Canvas</h1>
+                    <p className="text-black text-sm text-slate-500">Drag items to reorder • Click to edit properties</p>
                 </div>
-                <div className="bg-white px-3 py-1 rounded-full border text-xs font-medium text-slate-500 shadow-sm">
+                <div className="text-black bg-white px-3 py-1 rounded-full border text-xs font-medium text-slate-500 shadow-sm">
                     {blocks.length} Sections
                 </div>
             </div>
 
             {/* THE DROP ZONE */}
-            <div className="min-h-[600px] border-2 border-dashed border-slate-300 rounded-2xl p-6 transition-colors hover:border-blue-300 bg-slate-50/50">
+            <div className="text-black min-h-[600px] border-2 border-dashed border-slate-300 rounded-2xl p-6 transition-colors hover:border-blue-300 bg-slate-50/50">
                 {blocks.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-4 opacity-60">
+                    <div className="text-black h-full flex flex-col items-center justify-center text-slate-400 space-y-4 opacity-60">
                         <MousePointer2 size={48} />
-                        <p className="font-medium">Canvas is empty</p>
-                        <p className="text-sm">Click a tool on the left to start building.</p>
+                        <p className="text-black font-medium">Canvas is empty</p>
+                        <p className="text-black text-sm">Click a tool on the left to start building.</p>
                     </div>
                 ) : (
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -255,16 +255,16 @@ export default function PageBuilder() {
       </div>
 
       {/* --- RIGHT SIDEBAR: PROPERTIES PANEL --- */}
-      <div className="w-80 bg-white border-l border-slate-200 flex flex-col shadow-xl z-20">
-        <div className="p-5 border-b border-slate-100 bg-white">
-            <h2 className="font-bold text-lg text-slate-800">Properties</h2>
+      <div className="text-black w-80 bg-white border-l border-slate-200 flex flex-col shadow-xl z-20">
+        <div className="text-black p-5 border-b border-slate-100 bg-white">
+            <h2 className="text-black font-bold text-lg text-slate-800">Properties</h2>
         </div>
         
-        <div className="p-5 flex-1 overflow-y-auto">
+        <div className="text-black p-5 flex-1 overflow-y-auto">
             {selectedBlock ? (
-                <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
-                    <div className="flex items-center gap-2 mb-4 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold border border-blue-100">
-                        <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <div className="text-black space-y-5 animate-in slide-in-from-right-4 duration-300">
+                    <div className="text-black flex items-center gap-2 mb-4 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold border border-blue-100">
+                        <span className="text-black w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                         Editing {selectedBlock.type}
                     </div>
 
@@ -272,21 +272,21 @@ export default function PageBuilder() {
                     {selectedBlock.type === 'hero' && (
                         <>
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Title</label>
-                                <input className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" value={selectedBlock.content.title} onChange={e => updateBlockContent('title', e.target.value)} />
+                                <label className="text-black font-bold block mb-2 block text-xs font-bold text-slate-500 uppercase mb-1.5">Title</label>
+                                <input className="text-black w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" value={selectedBlock.content.title} onChange={e => updateBlockContent('title', e.target.value)} />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Subtitle</label>
-                                <textarea className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none" rows={3} value={selectedBlock.content.subtitle} onChange={e => updateBlockContent('subtitle', e.target.value)} />
+                                <label className="text-black font-bold block mb-2 block text-xs font-bold text-slate-500 uppercase mb-1.5">Subtitle</label>
+                                <textarea className="text-black w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none" rows={3} value={selectedBlock.content.subtitle} onChange={e => updateBlockContent('subtitle', e.target.value)} />
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="text-black grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Button Text</label>
-                                    <input className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" value={selectedBlock.content.btnText} onChange={e => updateBlockContent('btnText', e.target.value)} />
+                                    <label className="text-black font-bold block mb-2 block text-xs font-bold text-slate-500 uppercase mb-1.5">Button Text</label>
+                                    <input className="text-black w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" value={selectedBlock.content.btnText} onChange={e => updateBlockContent('btnText', e.target.value)} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Image URL</label>
-                                    <input className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="https://..." value={selectedBlock.content.bgImage} onChange={e => updateBlockContent('bgImage', e.target.value)} />
+                                    <label className="text-black font-bold block mb-2 block text-xs font-bold text-slate-500 uppercase mb-1.5">Image URL</label>
+                                    <input className="text-black w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="https://..." value={selectedBlock.content.bgImage} onChange={e => updateBlockContent('bgImage', e.target.value)} />
                                 </div>
                             </div>
                         </>
@@ -294,31 +294,31 @@ export default function PageBuilder() {
 
                     {selectedBlock.type === 'text' && (
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">HTML Content</label>
-                            <textarea className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono text-slate-600 h-64" value={selectedBlock.content.html} onChange={e => updateBlockContent('html', e.target.value)} />
-                            <p className="text-[10px] text-slate-400 mt-2">Use Tailwind classes for styling (e.g., class="text-red-500")</p>
+                            <label className="text-black font-bold block mb-2 block text-xs font-bold text-slate-500 uppercase mb-1.5">HTML Content</label>
+                            <textarea className="text-black w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono text-slate-600 h-64" value={selectedBlock.content.html} onChange={e => updateBlockContent('html', e.target.value)} />
+                            <p className="text-black text-[10px] text-slate-400 mt-2">Use Tailwind classes for styling (e.g., class="text-red-500")</p>
                         </div>
                     )}
 
                     {selectedBlock.type === 'image' && (
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Image Source URL</label>
-                            <input className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" value={selectedBlock.content.url} onChange={e => updateBlockContent('url', e.target.value)} />
+                            <label className="text-black font-bold block mb-2 block text-xs font-bold text-slate-500 uppercase mb-1.5">Image Source URL</label>
+                            <input className="text-black w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" value={selectedBlock.content.url} onChange={e => updateBlockContent('url', e.target.value)} />
                             {selectedBlock.content.url && (
-                                <div className="mt-3 rounded-lg overflow-hidden border border-slate-200">
-                                    <img src={selectedBlock.content.url} className="w-full h-32 object-cover" />
+                                <div className="text-black mt-3 rounded-lg overflow-hidden border border-slate-200">
+                                    <img src={selectedBlock.content.url} className="text-black w-full h-32 object-cover" />
                                 </div>
                             )}
                         </div>
                     )}
                 </div>
             ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                        <MousePointer2 size={24} className="opacity-50" />
+                <div className="text-black h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                    <div className="text-black w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                        <MousePointer2 size={24} className="text-black opacity-50" />
                     </div>
-                    <p className="font-medium text-slate-600">No Block Selected</p>
-                    <p className="text-sm mt-1">Click on a block in the canvas to edit its details here.</p>
+                    <p className="text-black font-medium text-slate-600">No Block Selected</p>
+                    <p className="text-black text-sm mt-1">Click on a block in the canvas to edit its details here.</p>
                 </div>
             )}
         </div>

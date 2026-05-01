@@ -126,29 +126,29 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="text-black space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-          <ShieldCheck className="text-blue-600" />
+      <div className="text-black flex justify-between items-center">
+        <h1 className="text-black text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <ShieldCheck className="text-black text-blue-600" />
           Admin Users
         </h1>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition"
+          className="text-black bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition"
         >
           <Plus size={18} /> Add New Admin
         </button>
       </div>
 
       {/* Search */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-        <div className="relative">
-          <Search className="absolute left-3 top-3 text-slate-400" size={20} />
+      <div className="text-black bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+        <div className="text-black relative">
+          <Search className="text-black absolute left-3 top-3 text-slate-400" size={20} />
           <input 
             type="text" 
             placeholder="Search by name or email..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="text-black w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -156,38 +156,38 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-        <table className="w-full text-left">
+      <div className="text-black bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+        <table className="text-black w-full text-left">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-4 font-semibold text-slate-600">Full Name</th>
-              <th className="px-6 py-4 font-semibold text-slate-600">Email</th>
-              <th className="px-6 py-4 font-semibold text-slate-600">Role</th>
-              <th className="px-6 py-4 font-semibold text-slate-600 text-right">Actions</th>
+              <th className="text-black font-extrabold uppercase px-6 py-4 font-semibold text-slate-600">Full Name</th>
+              <th className="text-black font-extrabold uppercase px-6 py-4 font-semibold text-slate-600">Email</th>
+              <th className="text-black font-extrabold uppercase px-6 py-4 font-semibold text-slate-600">Role</th>
+              <th className="text-black font-extrabold uppercase px-6 py-4 font-semibold text-slate-600 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="text-black divide-y divide-slate-100">
             {loading ? (
-              <tr><td colSpan={4} className="p-8 text-center text-slate-500">Loading...</td></tr>
+              <tr><td colSpan={4} className="text-black p-8 text-center text-slate-500">Loading...</td></tr>
             ) : filteredUsers.length === 0 ? (
-              <tr><td colSpan={4} className="p-8 text-center text-slate-500">No users found.</td></tr>
+              <tr><td colSpan={4} className="text-black p-8 text-center text-slate-500">No users found.</td></tr>
             ) : (
               filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-50 transition">
+                <tr key={user.id} className="text-black hover:bg-slate-50 transition">
                   {/* Updated Data Mapping */}
-                  <td className="px-6 py-4 font-medium text-slate-900">{user.full_name}</td>
-                  <td className="px-6 py-4 text-slate-600">{user.email}</td>
-                  <td className="px-6 py-4">
+                  <td className="text-black px-6 py-4 font-medium text-slate-900">{user.full_name}</td>
+                  <td className="text-black px-6 py-4 text-slate-600">{user.email}</td>
+                  <td className="text-black px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold 
                       ${user.is_sa === 1 ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
                       {user.is_sa === 1 ? 'Super Admin' : 'Manager'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    <button onClick={() => openEditModal(user)} className="text-slate-400 hover:text-blue-600">
+                  <td className="text-black px-6 py-4 text-right space-x-2">
+                    <button onClick={() => openEditModal(user)} className="text-black text-slate-400 hover:text-blue-600">
                       <Edit size={18} />
                     </button>
-                    <button onClick={() => handleDelete(user.id)} className="text-slate-400 hover:text-red-600">
+                    <button onClick={() => handleDelete(user.id)} className="text-black text-slate-400 hover:text-red-600">
                       <Trash2 size={18} />
                     </button>
                   </td>
@@ -200,59 +200,59 @@ export default function AdminUsersPage() {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="flex justify-between items-center p-6 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-800">
+        <div className="text-black fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="text-black bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="text-black flex justify-between items-center p-6 border-b border-slate-100">
+              <h3 className="text-black text-lg font-bold text-slate-800">
                 {editingUser ? 'Edit Admin' : 'Add New Admin'}
               </h3>
-              <button onClick={closeModal} className="text-slate-400 hover:text-slate-600">
+              <button onClick={closeModal} className="text-black text-slate-400 hover:text-slate-600">
                 <X size={24} />
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="text-black p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                <label className="text-black font-bold block mb-2 block text-sm font-medium text-slate-700 mb-1">Full Name</label>
                 <input 
                   type="text" 
                   required
                   // ADDED: text-slate-900
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-900"
+                  className="text-black w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-900"
                   value={formData.full_name}
                   onChange={(e) => setFormData({...formData, full_name: e.target.value})}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                <label className="text-black font-bold block mb-2 block text-sm font-medium text-slate-700 mb-1">Username</label>
                 <input 
                   type="text" 
                   required
                   // ADDED: text-slate-900
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-900"
+                  className="text-black w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-900"
                   value={formData.username}
                   onChange={(e) => setFormData({...formData, username: e.target.value})}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <label className="text-black font-bold block mb-2 block text-sm font-medium text-slate-700 mb-1">Email</label>
                 <input 
                   type="email" 
                   required
                   // ADDED: text-slate-900
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-900"
+                  className="text-black w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-900"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
+                <label className="text-black font-bold block mb-2 block text-sm font-medium text-slate-700 mb-1">Role</label>
                 <select 
                   // ADDED: text-slate-900
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-900"
+                  className="text-black w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-900"
                   value={formData.is_sa}
                   onChange={(e) => setFormData({...formData, is_sa: Number(e.target.value)})}
                 >
@@ -262,22 +262,22 @@ export default function AdminUsersPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Password {editingUser && <span className="text-xs text-slate-400">(Leave blank to keep current)</span>}
+                <label className="text-black font-bold block mb-2 block text-sm font-medium text-slate-700 mb-1">
+                  Password {editingUser && <span className="text-black text-xs text-slate-400">(Leave blank to keep current)</span>}
                 </label>
                 <input 
                   type="password" 
                   required={!editingUser} 
                   // ADDED: text-slate-900
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-900"
+                  className="text-black w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-900"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
               </div>
 
-              <div className="pt-4 flex gap-3">
-                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-slate-700">Cancel</button>
-                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save</button>
+              <div className="text-black pt-4 flex gap-3">
+                <button type="button" onClick={closeModal} className="text-black flex-1 px-4 py-2 border border-slate-300 rounded-lg text-slate-700">Cancel</button>
+                <button type="submit" className="text-black flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save</button>
               </div>
             </form>
           </div>

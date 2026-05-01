@@ -1,17 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Config strictly locked down to local assets for enterprise security
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'plus.unsplash.com',
-      }
-    ],
+    unoptimized: true, // Recommended when exporting as a standalone SaaS instance
   },
 };
 

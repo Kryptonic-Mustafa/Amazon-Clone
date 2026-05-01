@@ -1,30 +1,42 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+// Notice the type change to Promise<{ id: string }>
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    // We MUST await params in modern Next.js
+    const resolvedParams = await params;
+    const productId = parseInt(resolvedParams.id);
+    
+    const product = await prisma.products.findUnique({
+      where: { id: productId }
+    });
 
-    // Fetch the specific product
-    const [products]: any = await db.query('SELECT * FROM products WHERE id = ?', [id]);
+    if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    if (products.length === 0) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    // Fetch associated reviews safely
+    let reviews = [];
+    try {
+      reviews = await prisma.reviews.findMany({
+        where: { product_id: productId },
+        orderBy: { created_at: 'desc' }
+      });
+    } catch (e) {
+      console.log("Reviews table might not exist yet.");
     }
 
-    const product = products[0];
+    // Default dummy specs if DB column is empty
+    const specifications = product.specifications || {
+      "Item details": "High quality authentic material.",
+      "Style": "Modern / Contemporary",
+      "Measurements": "Standard sizing. Refer to chart.",
+      "Materials & Care": "Hand wash recommended.",
+      "Features & Specs": "Durable, Lightweight, Premium finish."
+    };
 
-    // Fetch suggested products (random 4 excluding current)
-    const [suggestions]: any = await db.query(
-      'SELECT * FROM products WHERE id != ? ORDER BY RAND() LIMIT 4', 
-      [id]
-    );
-
-    return NextResponse.json({ product, suggestions });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ product, reviews, specifications }, { status: 200 });
+  } catch (error) {
+    console.error("Product Fetch Error:", error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -1,210 +1,164 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
-} from 'recharts';
-import { Bell, Package, DollarSign, Users, TrendingUp } from 'lucide-react';
-import { useAdminNotifications } from "@/context/AdminNotificationContext"; 
-import NotificationModal from "@/components/admin/NotificationModal"; 
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { apiCall } from '@/lib/apiClient';
+import { DollarSign, Package, Users, AlertTriangle, FileSpreadsheet, Truck, Star, TrendingUp, ShoppingCart } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { useAdminLocale } from '@/context/AdminLocaleContext'; // NEW: Imported Locale Engine
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<any>({
-    totalRevenue: 0,
-    totalOrders: 0,
-    totalCustomers: 0,
-    recentOrders: [],
-    salesChart: [] 
-  });
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const { t, formatCurrency, formatNumber, locale } = useAdminLocale(); // Extracted formatters
 
-  const { unreadOrders, setShowModal } = useAdminNotifications();
-  const isJingling = unreadOrders.length > 0;
-
-  // UPDATED: Fetch logic inside a function + Polling
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const res = await fetch('/api/admin/dashboard');
-        const data = await res.json();
-        
-        // Handle empty chart data fallback
-        if (!data.salesChart || data.salesChart.length === 0) {
-           data.salesChart = [
-             { name: 'Mon', sales: 0 }, { name: 'Tue', sales: 0 }, 
-             { name: 'Wed', sales: 0 }, { name: 'Thu', sales: 0 }, 
-             { name: 'Fri', sales: 0 }, { name: 'Sat', sales: 0 }, 
-             { name: 'Sun', sales: 0 }
-           ];
-        }
-        setStats(data);
-      } catch (err) {
-        console.error("Dashboard fetch failed", err);
-      }
+    const fetchDashboard = async () => {
+      const result = await apiCall('/api/admin/dashboard');
+      if (result) setData(result);
+      setLoading(false);
     };
-
-    // 1. Initial Call
-    fetchDashboardData();
-
-    // 2. Poll every 5 seconds (Auto Refresh)
-    const interval = setInterval(fetchDashboardData, 5000);
-
-    // 3. Cleanup on unmount
-    return () => clearInterval(interval);
+    fetchDashboard();
   }, []);
 
+  if (loading) {
+    return <div className="p-8 flex items-center justify-center min-h-[80vh]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
+  }
+
+  const { stats, chartData, recentOrders } = data;
+
   return (
-    <div className="space-y-6">
-      <NotificationModal />
-      
-      {/* Header Section */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Dashboard Overview</h1>
-          <p className="text-slate-500 flex items-center gap-2">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-            </span>
-            System Live & Updating
-          </p>
-        </div>
-        
-        {/* BELL ICON */}
-        <button 
-          onClick={() => setShowModal(true)}
-          className={`relative p-3 rounded-full shadow-sm border transition-all duration-300 ${
-            isJingling ? 'bg-red-50 border-red-200 hover:bg-red-100' : 'bg-white hover:bg-gray-50'
-          }`}
-        >
-          <Bell 
-            size={24} 
-            className={`text-slate-600 ${isJingling ? 'animate-bell text-red-600' : ''}`} 
-            fill={isJingling ? "currentColor" : "none"} 
-          />
-          {unreadOrders.length > 0 && (
-            <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-600 border-2 border-white rounded-full text-[10px] font-bold text-white flex items-center justify-center shadow-sm">
-              {unreadOrders.length}
-            </span>
-          )}
-        </button>
+    <div className="p-6 md:p-8 bg-slate-50 min-h-screen">
+      <div className="mb-8">
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t('Platform Overview')}</h1>
+        <p className="text-slate-500 font-medium mt-1">{t('Real-time metrics for your enterprise modules.')}</p>
       </div>
 
-      {/* Dynamic Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Revenue Card */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 transition-all duration-500">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Total Revenue</p>
-              <h3 className="text-3xl font-bold text-slate-900 mt-2">
-                ${Number(stats.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-              </h3>
-            </div>
-            <div className="p-2 bg-green-100 text-green-600 rounded-lg">
-              <DollarSign size={24} />
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex justify-between items-start mb-4">
+            <div><p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{t('Total Revenue')}</p></div>
+            <div className="p-3 bg-green-100 text-green-600 rounded-xl"><DollarSign size={20}/></div>
           </div>
-          <div className="mt-4 flex items-center text-xs text-green-600 font-medium bg-green-50 w-fit px-2 py-1 rounded">
-             <TrendingUp size={14} className="mr-1" /> Lifetime Earnings
+          {/* APPLIED NATIVE CURRENCY FORMATTER */}
+          <h2 className="text-3xl font-black text-slate-900">{formatCurrency(stats.revenue)}</h2>
+          <p className="text-xs text-green-600 font-bold mt-2 flex items-center gap-1"><TrendingUp size={12}/> {t('All time')}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex justify-between items-start mb-4">
+            <div><p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{t('Total Orders')}</p></div>
+            <div className="p-3 bg-blue-100 text-blue-600 rounded-xl"><Package size={20}/></div>
+          </div>
+          <h2 className="text-3xl font-black text-slate-900">{formatNumber(stats.orders)}</h2>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex justify-between items-start mb-4">
+            <div><p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{t('Customers')}</p></div>
+            <div className="p-3 bg-purple-100 text-purple-600 rounded-xl"><Users size={20}/></div>
+          </div>
+          <h2 className="text-3xl font-black text-slate-900">{formatNumber(stats.customers)}</h2>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex justify-between items-start mb-4">
+            <div><p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{t('Avg Rating')}</p></div>
+            <div className="p-3 bg-yellow-100 text-yellow-600 rounded-xl"><Star size={20} className="fill-current"/></div>
+          </div>
+          <h2 className="text-3xl font-black text-slate-900">{formatNumber(stats.avgRating, 1)} <span className="text-lg text-slate-400 font-medium">/ {formatNumber(5)}</span></h2>
+          <p className="text-xs text-slate-500 font-bold mt-2">{t('Based on')} {formatNumber(stats.totalReviews)} {t('reviews')}</p>
+        </div>
+      </div>
+
+      <h3 className="text-lg font-black text-slate-900 tracking-tight mb-4 border-l-4 border-blue-600 pl-3 rtl:border-l-0 rtl:border-r-4 rtl:pr-3">{t('Module Activity')}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className={`p-6 rounded-2xl shadow-sm border ${stats.lowStock > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-slate-200'}`}>
+          <div className="flex items-center gap-4">
+            <div className={`p-4 rounded-full ${stats.lowStock > 0 ? 'bg-red-200 text-red-700' : 'bg-slate-100 text-slate-500'}`}><AlertTriangle size={24}/></div>
+            <div>
+              <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{t('Low Stock Items')}</p>
+              <h2 className={`text-2xl font-black ${stats.lowStock > 0 ? 'text-red-700' : 'text-slate-900'}`}>{formatNumber(stats.lowStock)} {t('Items')}</h2>
+            </div>
           </div>
         </div>
 
-        {/* Orders Card */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 transition-all duration-500">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Total Orders</p>
-              <h3 className="text-3xl font-bold text-slate-900 mt-2">{stats.totalOrders}</h3>
-            </div>
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-              <Package size={24} />
-            </div>
-          </div>
-           <div className="mt-4 flex items-center text-xs text-blue-600 font-medium bg-blue-50 w-fit px-2 py-1 rounded">
-             <TrendingUp size={14} className="mr-1" /> All Time
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+          <div className="p-4 rounded-full bg-blue-100 text-blue-700"><FileSpreadsheet size={24}/></div>
+          <div>
+            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{t('Total Quotations')}</p>
+            <h2 className="text-2xl font-black text-slate-900">{formatNumber(stats.quotes)} {t('Issued')}</h2>
           </div>
         </div>
 
-        {/* Customers Card */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 transition-all duration-500">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Unique Customers</p>
-              <h3 className="text-3xl font-bold text-slate-900 mt-2">{stats.totalCustomers}</h3>
-            </div>
-            <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
-              <Users size={24} />
-            </div>
-          </div>
-           <div className="mt-4 flex items-center text-xs text-purple-600 font-medium bg-purple-50 w-fit px-2 py-1 rounded">
-             <TrendingUp size={14} className="mr-1" /> Active Emails
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+          <div className="p-4 rounded-full bg-orange-100 text-orange-700"><Truck size={24}/></div>
+          <div>
+            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{t('Purchase Orders')}</p>
+            <h2 className="text-2xl font-black text-slate-900">{formatNumber(stats.pos)} {t('Created')}</h2>
           </div>
         </div>
       </div>
 
-      {/* Charts & Recent Orders */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left: DYNAMIC Sales Chart */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-          <h3 className="text-lg font-bold text-slate-800 mb-4">Last 7 Days Revenue</h3>
-          <div className="h-80 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
+          <h3 className="text-lg font-black text-slate-900 mb-6 tracking-tight">{t('Revenue (Last 7 Days)')}</h3>
+          <div className="h-[300px] w-full" dir="ltr"> {/* Charts usually need LTR wrapper */}
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.salesChart}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tickFormatter={(value) => `$${value}`} 
-                />
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} tickFormatter={(value) => formatNumber(value)} />
                 <Tooltip 
-                  formatter={(value: number) => [`$${value}`, 'Revenue']}
-                  contentStyle={{ backgroundColor: '#1e293b', color: '#fff', borderRadius: '8px', border: 'none' }}
-                  cursor={{ fill: '#f1f5f9' }}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  formatter={(value: number) => [formatCurrency(value), t('Amount')]}
                 />
-                <Bar dataKey="sales" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
-              </BarChart>
+                <Area type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Right: Recent Orders Feed */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col">
-          <h3 className="text-lg font-bold text-slate-800 mb-4">Recent Orders</h3>
-          <div className="space-y-4 flex-grow">
-            {stats.recentOrders.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 text-sm py-10">
-                 <Package className="mb-2 opacity-20" size={32} />
-                 <p>No orders found.</p>
-              </div>
+        <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
+          <div className="flex justify-between items-center mb-6">
+             <h3 className="text-lg font-black text-slate-900 tracking-tight">{t('Recent Orders')}</h3>
+          </div>
+          <div className="space-y-6">
+            {recentOrders.length === 0 ? (
+              <p className="text-slate-500 text-sm">No recent orders found.</p>
             ) : (
-              stats.recentOrders.map((order: any) => (
-                <div key={order.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
-                  <div className={`mt-1 h-2 w-2 rounded-full ${order.status === 'Pending' ? 'bg-yellow-400' : 'bg-green-400'}`} />
-                  <div className="flex-1">
-                    <div className="flex justify-between">
-                       <p className="text-sm font-semibold text-slate-800">Order #{order.id}</p>
-                       <p className="text-xs font-bold text-slate-900">${Number(order.total_amount).toFixed(2)}</p>
+              recentOrders.map((order: any) => (
+                <div key={order.id} className="flex justify-between items-center group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                      <ShoppingCart size={18} />
                     </div>
-                    <p className="text-xs text-slate-500">{order.customer_name}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
-                      {new Date(order.created_at).toLocaleDateString()}
-                    </p>
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">{t('Order ID')} #{formatNumber(order.id)}</p>
+                      <p className="text-xs text-slate-500 font-medium">{order.customer_name}</p>
+                    </div>
+                  </div>
+                  <div className={`text-right ${locale.startsWith('ar') ? 'text-left' : ''}`}>
+                    <p className="font-black text-slate-900">{formatCurrency(order.total_amount)}</p>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                      order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
+                      order.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {t(order.status)}
+                    </span>
                   </div>
                 </div>
               ))
             )}
           </div>
-          <Link 
-            href="/admin/orders" 
-            className="block w-full text-center mt-4 text-sm bg-slate-50 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-medium transition-colors"
-          >
-            View All Orders
-          </Link>
         </div>
       </div>
+      
     </div>
   );
 }

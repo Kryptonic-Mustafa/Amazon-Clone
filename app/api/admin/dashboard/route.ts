@@ -1,47 +1,71 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    // 1. Total Revenue (sum of all orders not cancelled)
-    const [revenueRes]: any = await db.query(
-      'SELECT SUM(total_amount) as total FROM orders WHERE status != "Cancelled"'
-    );
-    const totalRevenue = revenueRes[0].total || 0;
+    // 1. Basic Stats
+    const totalProducts = await prisma.products.count();
+    const totalCustomers = await prisma.users.count();
+    const totalOrders = await prisma.orders.count();
+    
+    const orders = await prisma.orders.findMany({ select: { total_amount: true, created_at: true, status: true }});
+    const totalRevenue = orders.reduce((sum, order) => sum + Number(order.total_amount), 0);
 
-    // 2. Total Orders
-    const [ordersRes]: any = await db.query('SELECT COUNT(*) as count FROM orders');
-    const totalOrders = ordersRes[0].count || 0;
+    // 2. New Enterprise Module Stats
+    const lowStockCount = await prisma.products.count({ where: { stock_qty: { lte: 10 } } });
+    const totalQuotes = await prisma.quotations.count();
+    const totalPOs = await prisma.purchase_orders.count();
+    
+    // 3. Reviews & Ratings
+    const reviews = await prisma.reviews.findMany({ select: { rating: true } });
+    const avgRating = reviews.length > 0 
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) 
+      : "0.0";
+    const totalReviews = reviews.length;
 
-    // 3. Total Customers (unique emails)
-    const [customersRes]: any = await db.query('SELECT COUNT(DISTINCT customer_email) as count FROM orders');
-    const totalCustomers = customersRes[0].count || 0;
+    // 4. Chart Data (Last 7 Days Revenue)
+    const chartData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      
+      const dayTotal = orders
+        .filter(o => new Date(o.created_at).toISOString().split('T')[0] === dateStr)
+        .reduce((sum, o) => sum + Number(o.total_amount), 0);
+        
+      chartData.push({
+        name: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        fullDate: dateStr,
+        revenue: dayTotal
+      });
+    }
 
-    // 4. Recent Orders (Last 5)
-    const [recentOrders]: any = await db.query('SELECT * FROM orders ORDER BY created_at DESC LIMIT 5');
-
-    // 5. CHART DATA: Sales for last 7 days
-    const [dailySales]: any = await db.query(`
-      SELECT 
-        DATE_FORMAT(created_at, '%a') as name, 
-        SUM(total_amount) as sales 
-      FROM orders 
-      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) 
-      GROUP BY DATE(created_at), DATE_FORMAT(created_at, '%a') 
-      ORDER BY DATE(created_at) ASC
-    `);
-
-    // If no sales in last 7 days, provide empty array or partial data
-    // (The frontend will handle mapping this)
+    // 5. Recent Orders List
+    const recentOrders = await prisma.orders.findMany({
+      take: 5,
+      orderBy: { created_at: 'desc' },
+      select: { id: true, customer_name: true, total_amount: true, status: true, created_at: true }
+    });
 
     return NextResponse.json({
-      totalRevenue,
-      totalOrders,
-      totalCustomers,
-      recentOrders,
-      salesChart: dailySales // Send this to frontend
-    });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+      stats: {
+        revenue: totalRevenue,
+        orders: totalOrders,
+        customers: totalCustomers,
+        products: totalProducts,
+        lowStock: lowStockCount,
+        quotes: totalQuotes,
+        pos: totalPOs,
+        avgRating,
+        totalReviews
+      },
+      chartData,
+      recentOrders
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error("Dashboard API Error:", error);
+    return NextResponse.json({ error: 'Failed to fetch dashboard data' }, { status: 500 });
   }
 }

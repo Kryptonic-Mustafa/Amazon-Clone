@@ -4,11 +4,13 @@ import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { X, ShoppingBag, Trash2, Plus, Minus } from 'lucide-react'; // Added Plus/Minus
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   // FIX: Added updateQuantity here
   const { cart, removeFromCart, updateQuantity, totalPrice } = useCart(); 
   const router = useRouter();
+  const { formatPrice } = useCurrency();
 
   const handleCheckout = () => {
     onClose();
@@ -76,7 +78,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean, onClo
                       {item.name}
                     </h4>
                     <p className="text-sm text-gray-500">
-                      ${Number(item.price).toFixed(2)}
+                      {formatPrice(Number(item.price))}
                     </p>
                   </div>
                   
@@ -102,7 +104,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean, onClo
 
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-gray-900">
-                        ${(Number(item.price) * item.quantity).toFixed(2)}
+                        {formatPrice(Number(item.price) * item.quantity)}
                       </span>
                       <button 
                         onClick={() => removeFromCart(item.id)}
@@ -123,7 +125,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean, onClo
           <div className="p-6 border-t border-gray-100 bg-gray-50">
             <div className="flex justify-between mb-4 items-end">
               <span className="text-gray-600 font-medium">Subtotal</span>
-              <span className="text-2xl font-bold text-gray-900">${(totalPrice || 0).toFixed(2)}</span>
+              <span className="text-2xl font-bold text-gray-900">{formatPrice(totalPrice || 0)}</span>
             </div>
             <button
               onClick={handleCheckout}

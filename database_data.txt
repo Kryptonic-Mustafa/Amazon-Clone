@@ -1,0 +1,627 @@
+=== AMAZON CLONE DATABASE DUMP ===
+
+
+--- TABLE: admin_users (2 records) ---
+[
+  {
+    "id": 1,
+    "full_name": "Super Admin",
+    "username": "admin",
+    "email": "admin@example.com",
+    "password": "123456",
+    "is_sa": true,
+    "created_at": "2025-12-18T21:59:42.000Z"
+  },
+  {
+    "id": 2,
+    "full_name": "Store Manager",
+    "username": "manager",
+    "email": "manager@example.com",
+    "password": "123456",
+    "is_sa": false,
+    "created_at": "2025-12-18T21:59:42.000Z"
+  }
+]
+
+
+--- TABLE: brands (7 records) ---
+[
+  {
+    "id": 7,
+    "name": "Adoni"
+  },
+  {
+    "id": 1,
+    "name": "Apple"
+  },
+  {
+    "id": 6,
+    "name": "Arts Studio"
+  },
+  {
+    "id": 3,
+    "name": "Nike"
+  },
+  {
+    "id": 5,
+    "name": "Saif Al Burhan"
+  },
+  {
+    "id": 2,
+    "name": "Samsung"
+  },
+  {
+    "id": 4,
+    "name": "Sony"
+  }
+]
+
+
+--- TABLE: categories (9 records) ---
+[
+  {
+    "id": 1,
+    "name": "Electronics",
+    "parent_id": 0,
+    "image_url": null
+  },
+  {
+    "id": 2,
+    "name": "Laptops",
+    "parent_id": 1,
+    "image_url": null
+  },
+  {
+    "id": 3,
+    "name": "Smartphones",
+    "parent_id": 1,
+    "image_url": null
+  },
+  {
+    "id": 4,
+    "name": "Fashion",
+    "parent_id": 0,
+    "image_url": null
+  },
+  {
+    "id": 5,
+    "name": "Men",
+    "parent_id": 4,
+    "image_url": null
+  },
+  {
+    "id": 6,
+    "name": "Women",
+    "parent_id": 4,
+    "image_url": null
+  },
+  {
+    "id": 7,
+    "name": "Attar",
+    "parent_id": 0,
+    "image_url": null
+  },
+  {
+    "id": 8,
+    "name": "ArtsStudio",
+    "parent_id": 0,
+    "image_url": null
+  },
+  {
+    "id": 9,
+    "name": "Clothes",
+    "parent_id": 0,
+    "image_url": null
+  }
+]
+
+
+--- TABLE: content_blocks (7 records) ---
+[
+  {
+    "id": 1,
+    "section_name": "home_hero",
+    "content_json": {
+      "title": "Quality You Can Trust, Styles You Will Love.",
+      "subtitle": "Discover our premium collection of electronics, fashion, and lifestyle essentials. Curated just for you.",
+      "buttonLink": "/shop",
+      "buttonText": "Shop Now",
+      "backgroundImageUrl": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1470&auto=format&fit=crop"
+    },
+    "last_updated": "2025-12-21T15:41:59.000Z"
+  },
+  {
+    "id": 2,
+    "section_name": "home_about",
+    "content_json": {
+      "points": [
+        "Premium Quality Guaranteed",
+        "24/7 Customer Support",
+        "Fast & Secure Shipping",
+        "Easy 30-Day Returns"
+      ],
+      "imageUrl": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1471&auto=format&fit=crop",
+      "mainTitle": "Redefining the Shopping Experience Since 2024",
+      "smallTitle": "About Our Brand",
+      "description": "We started with a simple mission: to provide high-quality products that improve your daily life. Whether you are looking for the latest tech gadgets, trendy fashion, or home essentials, we carefully select every item in our store to ensure durability and style."
+    },
+    "last_updated": "2025-12-21T15:41:59.000Z"
+  },
+  {
+    "id": 3,
+    "section_name": "shop_header",
+    "content_json": {
+      "title": "Our Complete Collection",
+      "description": "Browse through our wide range of premium products tailored for your needs."
+    },
+    "last_updated": "2025-12-21T15:41:59.000Z"
+  },
+  {
+    "id": 4,
+    "section_name": "product_details_info",
+    "content_json": {
+      "title": "Why Choose This Product?",
+      "content": "All our products are backed by a 1-year warranty and a 30-day money-back guarantee. We ensure the highest quality standards."
+    },
+    "last_updated": "2025-12-21T15:41:59.000Z"
+  },
+  {
+    "id": 5,
+    "section_name": "home_page_builder",
+    "content_json": [],
+    "last_updated": "2025-12-21T15:55:31.000Z"
+  },
+  {
+    "id": 6,
+    "section_name": "home_testimonials",
+    "content_json": {
+      "title": "What Our Customers Say",
+      "reviews": [
+        {
+          "name": "Sarah Jenkins",
+          "role": "Verified Buyer",
+          "text": "Absolutely love the quality! The shipping was faster than expected."
+        },
+        {
+          "name": "Michael Chen",
+          "role": "Tech Enthusiast",
+          "text": "Great selection of electronics. The customer support team helped me choose the perfect laptop."
+        },
+        {
+          "name": "Emma Wilson",
+          "role": "Fashion Blogger",
+          "text": "The clothes fit perfectly and look exactly like the photos. Highly recommended!"
+        }
+      ]
+    },
+    "last_updated": "2025-12-21T16:04:22.000Z"
+  },
+  {
+    "id": 7,
+    "section_name": "home_contact",
+    "content_json": {
+      "email": "support@example.com",
+      "phone": "+1 (555) 123-4567",
+      "title": "Get in Touch",
+      "address": "123 Commerce St, New York, NY",
+      "description": "Have questions about our products or your order? We are here to help."
+    },
+    "last_updated": "2025-12-21T16:04:22.000Z"
+  }
+]
+
+
+--- TABLE: invoices (1 records) ---
+[
+  {
+    "id": 1,
+    "invoice_number": "INV-2025-0001",
+    "order_id": 6,
+    "customer_name": "Professor Snape",
+    "customer_address": "Gregorian Beast Town.",
+    "total_amount": "1500",
+    "tax_amount": "270",
+    "created_at": "2025-12-21T17:17:12.000Z"
+  }
+]
+
+
+--- TABLE: ledger (1 records) ---
+[
+  {
+    "id": 1,
+    "transaction_date": "2025-12-21T17:17:12.000Z",
+    "description": "Invoice generated for Order #6",
+    "reference_id": 6,
+    "type": "INVOICE",
+    "debit": "1500",
+    "credit": "0",
+    "balance": "-1500",
+    "created_at": "2025-12-21T17:17:12.000Z"
+  }
+]
+
+
+--- TABLE: offers (0 records) ---
+[]
+
+
+--- TABLE: order_items (9 records) ---
+[
+  {
+    "id": 1,
+    "order_id": 1,
+    "product_id": 3,
+    "product_name": "Gaming Laptop ROG",
+    "quantity": 1,
+    "price": "1500"
+  },
+  {
+    "id": 2,
+    "order_id": 2,
+    "product_id": 5,
+    "product_name": "Summer Dress",
+    "quantity": 1,
+    "price": "45"
+  },
+  {
+    "id": 3,
+    "order_id": 2,
+    "product_id": 2,
+    "product_name": "iPhone 14",
+    "quantity": 1,
+    "price": "999"
+  },
+  {
+    "id": 4,
+    "order_id": 3,
+    "product_id": 1,
+    "product_name": "MacBook Pro M2",
+    "quantity": 1,
+    "price": "1200"
+  },
+  {
+    "id": 5,
+    "order_id": 3,
+    "product_id": 5,
+    "product_name": "Summer Dress",
+    "quantity": 1,
+    "price": "45"
+  },
+  {
+    "id": 6,
+    "order_id": 4,
+    "product_id": 4,
+    "product_name": "Denim Jacket",
+    "quantity": 1,
+    "price": "50"
+  },
+  {
+    "id": 7,
+    "order_id": 5,
+    "product_id": 5,
+    "product_name": "Summer Dress",
+    "quantity": 1,
+    "price": "45"
+  },
+  {
+    "id": 8,
+    "order_id": 6,
+    "product_id": 6,
+    "product_name": "RUH E KHAS",
+    "quantity": 3,
+    "price": "500"
+  },
+  {
+    "id": 9,
+    "order_id": 7,
+    "product_id": 7,
+    "product_name": "Mona Lisa Painting",
+    "quantity": 2,
+    "price": "350"
+  }
+]
+
+
+--- TABLE: orders (7 records) ---
+[
+  {
+    "id": 1,
+    "customer_name": "John Doe",
+    "customer_email": "john@example.com",
+    "customer_phone": "123654789910",
+    "user_id": null,
+    "total_amount": "1500",
+    "status": "Cancelled",
+    "invoice_no": null,
+    "shipping_address": "ajkjhgfdsa",
+    "created_at": "2025-12-19T22:59:41.000Z",
+    "viewed": true,
+    "payment_status": "pending"
+  },
+  {
+    "id": 2,
+    "customer_name": "johnBB",
+    "customer_email": "john1@gmail.com",
+    "customer_phone": "7575756756",
+    "user_id": null,
+    "total_amount": "1044",
+    "status": "Pending",
+    "invoice_no": null,
+    "shipping_address": "Asfdsgsdfg",
+    "created_at": "2025-12-19T23:16:59.000Z",
+    "viewed": true,
+    "payment_status": "pending"
+  },
+  {
+    "id": 3,
+    "customer_name": "kkk",
+    "customer_email": "tacastar@gmail.com",
+    "customer_phone": "434392424",
+    "user_id": null,
+    "total_amount": "1245",
+    "status": "Shipped",
+    "invoice_no": null,
+    "shipping_address": "WFfsdfas",
+    "created_at": "2025-12-19T23:20:16.000Z",
+    "viewed": true,
+    "payment_status": "pending"
+  },
+  {
+    "id": 4,
+    "customer_name": "sss",
+    "customer_email": "ss@ss.ss",
+    "customer_phone": "333332523523",
+    "user_id": null,
+    "total_amount": "50",
+    "status": "Pending",
+    "invoice_no": null,
+    "shipping_address": "wee",
+    "created_at": "2025-12-21T12:09:09.000Z",
+    "viewed": true,
+    "payment_status": "pending"
+  },
+  {
+    "id": 5,
+    "customer_name": "weqdrqwer",
+    "customer_email": "weqweqwe@asf",
+    "customer_phone": "qwe",
+    "user_id": null,
+    "total_amount": "45",
+    "status": "Pending",
+    "invoice_no": null,
+    "shipping_address": "qweqwe",
+    "created_at": "2025-12-21T12:18:26.000Z",
+    "viewed": true,
+    "payment_status": "pending"
+  },
+  {
+    "id": 6,
+    "customer_name": "Professor Snape",
+    "customer_email": "snape@gmail.com",
+    "customer_phone": "7541268930",
+    "user_id": 2,
+    "total_amount": "1500",
+    "status": "Pending",
+    "invoice_no": null,
+    "shipping_address": "Gregorian Beast Town.",
+    "created_at": "2025-12-21T12:33:47.000Z",
+    "viewed": true,
+    "payment_status": "pending"
+  },
+  {
+    "id": 7,
+    "customer_name": "sdfsdf",
+    "customer_email": "admin@gmail.com",
+    "customer_phone": "sdfsdf",
+    "user_id": 3,
+    "total_amount": "700",
+    "status": "Pending",
+    "invoice_no": null,
+    "shipping_address": "sdfsdf",
+    "created_at": "2026-04-26T00:11:58.000Z",
+    "viewed": false,
+    "payment_status": "pending"
+  }
+]
+
+
+--- TABLE: permissions (0 records) ---
+[]
+
+
+--- TABLE: products (9 records) ---
+[
+  {
+    "id": 1,
+    "name": "MacBook Pro M2",
+    "slug": "macbook-pro-m2",
+    "description": "Powerhouse laptop.",
+    "price": "1200",
+    "discount_percent": 10,
+    "sale_flag": 1,
+    "stock_qty": 36,
+    "category_ids": "1,2",
+    "image_urls": "https://images.unsplash.com/photo-1517336714731-489689fd1ca4",
+    "brand": "Apple",
+    "rating": "4.8",
+    "created_at": "2025-12-18T00:01:42.000Z"
+  },
+  {
+    "id": 2,
+    "name": "iPhone 14",
+    "slug": "iphone-14",
+    "description": "Latest smartphone.",
+    "price": "999",
+    "discount_percent": 5,
+    "sale_flag": 1,
+    "stock_qty": 10,
+    "category_ids": "1,3",
+    "image_urls": "https://images.unsplash.com/photo-1678685888221-cda773a3dcd9",
+    "brand": "Apple",
+    "rating": "4.5",
+    "created_at": "2025-12-18T00:01:42.000Z"
+  },
+  {
+    "id": 3,
+    "name": "Gaming Laptop ROG",
+    "slug": "rog-strix",
+    "description": "High performance gaming.",
+    "price": "1500",
+    "discount_percent": 0,
+    "sale_flag": 0,
+    "stock_qty": 6,
+    "category_ids": "1,2",
+    "image_urls": "https://images.unsplash.com/photo-1603302576837-37561b2e2302",
+    "brand": "Asus",
+    "rating": "4.2",
+    "created_at": "2025-12-18T00:01:42.000Z"
+  },
+  {
+    "id": 4,
+    "name": "Denim Jacket",
+    "slug": "denim-jacket",
+    "description": "Stylish blue jacket.",
+    "price": "50",
+    "discount_percent": 20,
+    "sale_flag": 1,
+    "stock_qty": 5,
+    "category_ids": "4,5",
+    "image_urls": "https://images.unsplash.com/photo-1576871337632-b9aef4c17ab9",
+    "brand": "Levi",
+    "rating": "4",
+    "created_at": "2025-12-18T00:01:42.000Z"
+  },
+  {
+    "id": 5,
+    "name": "Summer Dress",
+    "slug": "summer-dress",
+    "description": "Floral print dress.",
+    "price": "45",
+    "discount_percent": 5,
+    "sale_flag": 1,
+    "stock_qty": 2,
+    "category_ids": "4,6",
+    "image_urls": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1",
+    "brand": "H&M",
+    "rating": "4.7",
+    "created_at": "2025-12-18T00:01:42.000Z"
+  },
+  {
+    "id": 6,
+    "name": "RUH E KHAS",
+    "slug": "ruh-e-khas",
+    "description": "The Amazing Essence which lifts up the nose!",
+    "price": "500",
+    "discount_percent": 12,
+    "sale_flag": 1,
+    "stock_qty": 97,
+    "category_ids": "7",
+    "image_urls": "/uploads/products/6/image-1766163321871.png",
+    "brand": "Saif Al Burhan",
+    "rating": "0",
+    "created_at": "2025-12-19T22:25:21.000Z"
+  },
+  {
+    "id": 7,
+    "name": "Mona Lisa Painting",
+    "slug": "mona-lisa-painting",
+    "description": "Painting Beatifullioyo",
+    "price": "350",
+    "discount_percent": 2,
+    "sale_flag": 0,
+    "stock_qty": 54,
+    "category_ids": "",
+    "image_urls": "/uploads/products/7/image-1766166798886.png",
+    "brand": "Arts Studio",
+    "rating": "0",
+    "created_at": "2025-12-19T23:23:18.000Z"
+  },
+  {
+    "id": 8,
+    "name": "Oud Musk Zaffran",
+    "slug": "oud-musk-zaffran",
+    "description": "Oud Endulged with Musk and essence of Zaffran.",
+    "price": "125",
+    "discount_percent": 5,
+    "sale_flag": 1,
+    "stock_qty": 100,
+    "category_ids": "7",
+    "image_urls": "/uploads/products/8/image-1766307815014.jpeg",
+    "brand": "Saif Al Burhan",
+    "rating": "0",
+    "created_at": "2025-12-21T14:33:35.000Z"
+  },
+  {
+    "id": 10,
+    "name": "Abaya",
+    "slug": "abaya",
+    "description": "Religion Attire",
+    "price": "200",
+    "discount_percent": 25,
+    "sale_flag": 0,
+    "stock_qty": 20,
+    "category_ids": "4,6,9",
+    "image_urls": "",
+    "brand": "Adoni",
+    "rating": "0",
+    "created_at": "2026-04-26T10:35:46.000Z"
+  }
+]
+
+
+--- TABLE: roles (0 records) ---
+[]
+
+
+--- TABLE: tax_settings (1 records) ---
+[
+  {
+    "id": 1,
+    "tax_name": "GST",
+    "rate_percent": "18",
+    "is_active": true
+  }
+]
+
+
+--- TABLE: users (3 records) ---
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@gmail.com",
+    "password_hash": "$2a$10$MT/RdN4oK6ffwSwDb7jOjeFcpKfRDMGrc2E.eRj6pj8mhyGNhuBNi",
+    "phone": "7894561230",
+    "role_ids": null,
+    "offer_ids": null,
+    "address": "pune,mh-411089",
+    "created_at": "2025-12-18T23:21:33.000Z",
+    "is_active": 1
+  },
+  {
+    "id": 2,
+    "name": "Professor Snape",
+    "email": "snape@gmail.com",
+    "password_hash": "$2b$10$o11ESmodunPbMeyg26E14..m3T0n4wtZ.oBJzh1WEMcuG06Psk1s6",
+    "phone": "7541268930",
+    "role_ids": "customer",
+    "offer_ids": null,
+    "address": "Gregorian Beast Town.",
+    "created_at": "2025-12-21T12:33:47.000Z",
+    "is_active": 1
+  },
+  {
+    "id": 3,
+    "name": "sdfsdf",
+    "email": "admin@gmail.com",
+    "password_hash": "$2a$10$gcduGNG4Qq0qTJb5gEuv9.u.mQuplTVnxX/VQ3BimBF4lGbG47S3O",
+    "phone": "sdfsdf",
+    "role_ids": "customer",
+    "offer_ids": null,
+    "address": "sdfsdf",
+    "created_at": "2026-04-26T00:11:58.000Z",
+    "is_active": 1
+  }
+]
+

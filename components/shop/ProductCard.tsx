@@ -2,86 +2,71 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { Star, ShoppingCart, Heart } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
+import toast from 'react-hot-toast';
 
 export default function ProductCard({ product }: { product: any }) {
-  const router = useRouter();
+  const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   
-  const isSale = Number(product.sale_flag) === 1;
-  const originalPrice = Number(product.compare_at_price || product.original_price || 0);
   const currentPrice = Number(product.price || 0);
+  const discount = Number(product.discount_percent || 0);
   
-  let discount = Number(product.discount_percent || product.discount || 0);
-  if (discount === 0 && originalPrice > currentPrice) {
-      discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
-  }
+  // STRICT SALE LOGIC: Must explicitly have sale_flag=1 AND a discount > 0
+  const isSale = Number(product.sale_flag) === 1 && discount > 0;
   
+  // Real Math: If current price is 180 and discount is 28%, old price is 250.
+  const oldPrice = isSale ? (currentPrice / (1 - (discount / 100))) : currentPrice;
+
+  const isLiked = isInWishlist(product.id);
   const imageSrc = product.image_urls ? product.image_urls.split(',')[0] : '/placeholder.png';
 
-  const handleViewClick = (e: React.MouseEvent | React.PointerEvent | React.TouchEvent) => {
-    // THIS IS THE MAGIC FIX: Stops the carousel from stealing the click!
+  const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault(); 
-    e.stopPropagation(); 
-    router.push(`/shop/${product.id}`);
+    addToCart({ ...product, quantity: 1, image_urls: imageSrc });
+    toast.success(`${product.name} added to cart!`);
+  };
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    toggleWishlist(product);
   };
 
   return (
-    <div className="group relative bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full w-full">
+    <div className="group relative bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
       
-      {isSale && discount > 0 && (
+      {isSale && (
         <div className="absolute top-3 left-3 z-10 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">
           -{discount}%
         </div>
       )}
-
-      {isSale && (
-        <div className="absolute top-3 right-3 z-10 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-sm tracking-wider uppercase shadow-sm">
-          SALE
-        </div>
-      )}
       
-      <div 
-        onClick={handleViewClick}
-        className="block relative h-64 w-full bg-slate-50 p-6 overflow-hidden cursor-pointer"
-      >
-        <Image 
-          src={imageSrc} 
-          alt={product.name} 
-          fill 
-          className="object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" 
-        />
-      </div>
+      <button onClick={handleLike} className="absolute top-3 right-3 z-20 bg-white/80 backdrop-blur border border-slate-200 p-2 rounded-full shadow-sm hover:bg-white transition-all active:scale-95">
+        <Heart size={18} className={`transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-slate-400'}`} />
+      </button>
+
+      <Link href={`/shop/${product.id}`} className="block relative h-64 w-full bg-slate-50 p-6 overflow-hidden">
+        <Image src={imageSrc} alt={product.name} fill className="object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
+      </Link>
       
       <div className="p-5 flex flex-col flex-grow">
-        <div className="text-[10px] text-blue-600 font-bold uppercase tracking-widest mb-1">
-          {product.brand || product.category_name || 'General'}
-        </div>
-        <div 
-          onClick={handleViewClick}
-          className="font-medium text-slate-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors cursor-pointer"
-        >
-          {product.name}
+        <div className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">{product.category_name || product.category || product.brand || 'General'}</div>
+        <Link href={`/shop/${product.id}`}><h3 className="font-semibold text-slate-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors">{product.name}</h3></Link>
+        
+        <div className="flex items-center gap-1 mb-3">
+          {[...Array(5)].map((_, i) => <Star key={i} size={14} className={i < Math.round(Number(product.rating || 0)) ? "fill-yellow-400 text-yellow-400" : "fill-slate-200 text-slate-200"} />)}
+          <span className="text-xs text-slate-500 ml-1 font-bold">({Number(product.rating || 0).toFixed(1)})</span>
         </div>
 
-        <div className="mt-auto flex items-end justify-between pt-4">
+        <div className="mt-auto flex items-end justify-between">
           <div>
-            {isSale && (
-              <div className="text-xs text-slate-400 line-through mb-0.5">
-                ${originalPrice > 0 ? originalPrice.toFixed(2) : (currentPrice * (1 + (discount/100))).toFixed(2)}
-              </div>
-            )}
-            <div className="text-xl font-black text-slate-900 tracking-tight">
-              ${currentPrice.toFixed(2)}
-            </div>
+            {isSale && <div className="text-xs text-slate-400 line-through mb-0.5">${oldPrice.toFixed(2)}</div>}
+            <div className="text-xl font-black text-slate-900">${currentPrice.toFixed(2)}</div>
           </div>
-          
-          {/* THE BUTTON FIX: Forced cursor-pointer, high z-index, event stoppers */}
-          <button 
-            onClick={handleViewClick}
-            onPointerDown={handleViewClick}
-            className="relative z-50 cursor-pointer bg-[#0f172a] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-600 hover:shadow-lg transition-all active:scale-95 pointer-events-auto"
-          >
-            View
+          <button onClick={handleAdd} className="bg-slate-900 text-white p-3 rounded-xl hover:bg-blue-600 hover:shadow-lg transition-all active:scale-95" title="Add to Cart">
+            <ShoppingCart size={18} />
           </button>
         </div>
       </div>

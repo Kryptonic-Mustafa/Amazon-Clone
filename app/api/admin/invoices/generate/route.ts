@@ -30,6 +30,9 @@ export async function POST(req: Request) {
         [invoiceNumber, orderId, customerName, address, amount, taxAmount]
     );
 
+    // 4.1 Update Order with Invoice Number
+    await db.query('UPDATE orders SET invoice_no = ? WHERE id = ?', [invoiceNumber, orderId]);
+
     // 5. UPDATE LEDGER (Debit Entry - "Receivable Created")
     // Get last ledger balance
     const [lastEntry]: any = await db.query('SELECT balance FROM ledger ORDER BY id DESC LIMIT 1');

@@ -1,55 +1,51 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
-// GET: Fetch Single Order Details with Items
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> } // Fix for Next.js 15+ params
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
 
-    // 1. Fetch Order Info
-    const [orders]: any = await db.query(
-      'SELECT * FROM orders WHERE id = ?', 
-      [id]
-    );
+    // Fetch the Order
+    const order = await prisma.orders.findUnique({
+      where: { id: Number(id) },
+    });
+    
+    if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
 
-    if (orders.length === 0) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-    }
+    // Safely fetch items if they exist
+    let items = [];
+    try {
+        items = await prisma.order_items.findMany({ where: { order_id: Number(id) } });
+    } catch(e) {}
 
-    const order = orders[0];
+    // Fetch the Invoice (if it has been generated)
+    const invoice = await prisma.invoices.findFirst({
+        where: { order_id: Number(id) }
+    });
 
-    // 2. Fetch Order Items (Join with products to get images if needed)
-    // We select product_name, quantity, price, and potentially image_urls from products table
-    const [items]: any = await db.query(
-      `SELECT oi.*, p.image_urls 
-       FROM order_items oi 
-       LEFT JOIN products p ON oi.product_id = p.id 
-       WHERE oi.order_id = ?`,
-      [id]
-    );
-
-    return NextResponse.json({ order, items });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    // Return the order, embedding the items and invoice
+    return NextResponse.json({ ...order, items, invoice: invoice || null }, { status: 200 });
+  } catch (error) {
+    console.error("🚨 Order GET Error:", error);
+    return NextResponse.json({ error: 'Failed to fetch order details' }, { status: 500 });
   }
 }
 
-// PUT: Update Order Status
-export async function PUT(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
     const { status } = await req.json();
 
-    await db.query('UPDATE orders SET status = ? WHERE id = ?', [status, id]);
-
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const updatedOrder = await prisma.orders.update({
+      where: { id: Number(id) },
+      data: { status }
+    });
+    
+    return NextResponse.json(updatedOrder, { status: 200 });
+  } catch (error) {
+    console.error("🚨 Order PUT Error:", error);
+    return NextResponse.json({ error: 'Failed to update order status' }, { status: 500 });
   }
 }

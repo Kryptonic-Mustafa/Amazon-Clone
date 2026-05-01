@@ -1,35 +1,33 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    // Fetch all categories sorted by name
-    const [categories]: any = await db.query('SELECT * FROM Categories ORDER BY name ASC');
-    return NextResponse.json(categories);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const categories = await prisma.categories.findMany({ where: { is_active: true,  is_active: true }, orderBy: { name: 'asc' } });
+    return NextResponse.json(categories, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
   try {
     const { name } = await req.json();
-    
-    // Insert into your existing table. Default parent_id to 0 (Root)
-    await db.query('INSERT INTO Categories (name, parent_id) VALUES (?, 0)', [name]);
-    
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const cat = await prisma.categories.create({ data: { name, parent_id: 0 } });
+    return NextResponse.json(cat, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to create' }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request) {
+export async function PUT(req: Request) {
   try {
-    const { id } = await req.json();
-    await db.query('DELETE FROM Categories WHERE id = ?', [id]);
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const url = new URL(req.url);
+    const id = parseInt(url.searchParams.get('id') || '0');
+    const { name } = await req.json();
+    const cat = await prisma.categories.update({ where: { id }, data: { name } });
+    return NextResponse.json(cat, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
   }
 }

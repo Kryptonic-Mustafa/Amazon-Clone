@@ -1,40 +1,25 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
-export const dynamic = 'force-dynamic'; // Ensure fresh data is fetched
+export async function GET(req: Request, { params }: { params: { section: string } }) {
+  const url = new URL(req.url);
+  const lang = url.searchParams.get('lang') || 'en';
 
-type Props = {
-    params: Promise<{ section: string }>
-};
-
-// GET: Fetch content for a specific section name
-export async function GET(req: Request, { params }: Props) {
   try {
-    const resolvedParams = await params;
-    const sectionName = resolvedParams.section;
+    const content = await prisma.pageContent.findUnique({
+      where: { section_key: params.section }
+    });
 
-    const [rows]: any = await db.query(
-      'SELECT content_json FROM content_blocks WHERE section_name = ?',
-      [sectionName]
-    );
-
-    if (rows.length === 0) {
-      // Return empty object if block doesn't exist yet, to prevent frontend crashes
-      return NextResponse.json({});
+    if (!content) {
+      // Fallback empty data if nothing exists yet
+      return NextResponse.json({}, { status: 200 });
     }
 
-    // Parse the JSON string from the database back into a JSON object before sending
-    let parsedContent = {};
-    try {
-        parsedContent = typeof rows[0].content_json === 'string' 
-            ? JSON.parse(rows[0].content_json) 
-            : rows[0].content_json;
-    } catch (e) {
-        console.error("Failed to parse content JSON:", e);
-    }
-
-    return NextResponse.json(parsedContent);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    // Serve strictly the requested language
+    const data = lang === 'ar' ? content.content_ar : content.content_en;
+    return NextResponse.json(data || {}, { status: 200 });
+  } catch (error) {
+    console.error(`Content GET Error [${params.section}]:`, error);
+    return NextResponse.json({ error: 'Failed to fetch content' }, { status: 500 });
   }
 }

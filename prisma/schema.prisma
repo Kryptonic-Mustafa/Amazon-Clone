@@ -1,0 +1,228 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model admin_users {
+  id         Int       @id @default(autoincrement())
+  full_name  String    @db.VarChar(100)
+  username   String    @unique(map: "username") @db.VarChar(50)
+  email      String    @unique(map: "email") @db.VarChar(100)
+  password   String    @db.VarChar(255)
+  is_sa      Boolean?  @default(false)
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+  is_active Boolean @default(true)
+}
+
+model brands {
+  id   Int    @id @default(autoincrement())
+  name String @unique(map: "name") @db.VarChar(255)
+  is_active Boolean @default(true)
+}
+
+model categories {
+  id        Int     @id @default(autoincrement())
+  name      String  @db.VarChar(100)
+  parent_id Int?    @default(0)
+  image_url String? @db.VarChar(255)
+  is_active Boolean @default(true)
+}
+
+model content_blocks {
+  id           Int       @id @default(autoincrement())
+  section_name String?   @unique(map: "section_name") @db.VarChar(50)
+  content_json Json?
+  last_updated DateTime? @default(now()) @db.Timestamp(0)
+  is_active Boolean @default(true)
+}
+
+model invoices {
+  id               Int       @id @default(autoincrement())
+  invoice_number   String    @unique(map: "invoice_number") @db.VarChar(50)
+  order_id         Int
+  customer_name    String?   @db.VarChar(255)
+  customer_address String?   @db.Text
+  total_amount     Decimal   @db.Decimal(10, 2)
+  tax_amount       Decimal?  @default(0.00) @db.Decimal(10, 2)
+  created_at       DateTime? @default(now()) @db.DateTime(0)
+  orders           orders    @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "invoices_ibfk_1")
+
+  @@index([order_id], map: "order_id")
+  is_active Boolean @default(true)
+}
+
+model ledger {
+  id               Int         @id @default(autoincrement())
+  transaction_date DateTime?   @default(now()) @db.DateTime(0)
+  description      String      @db.VarChar(255)
+  reference_id     Int?
+  type             ledger_type
+  debit            Decimal?    @default(0.00) @db.Decimal(10, 2)
+  credit           Decimal?    @default(0.00) @db.Decimal(10, 2)
+  balance          Decimal     @db.Decimal(10, 2)
+  created_at       DateTime?   @default(now()) @db.Timestamp(0)
+  is_active Boolean @default(true)
+}
+
+model offers {
+  id                Int      @id @default(autoincrement())
+  code              String?  @unique(map: "code") @db.VarChar(50)
+  discount_amount   Decimal? @db.Decimal(10, 2)
+  valid_product_ids String?  @db.Text
+  is_active         Int?     @default(1) @db.TinyInt
+}
+
+model order_items {
+  id           Int      @id @default(autoincrement())
+  order_id     Int?
+  product_id   Int?
+  product_name String?  @db.VarChar(255)
+  quantity     Int?
+  price        Decimal? @db.Decimal(10, 2)
+  orders       orders?  @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "order_items_ibfk_1")
+
+  @@index([order_id], map: "order_id")
+  is_active Boolean @default(true)
+}
+
+model orders {
+  id               Int           @id @default(autoincrement())
+  customer_name    String?       @db.VarChar(255)
+  customer_email   String?       @db.VarChar(255)
+  customer_phone   String?       @db.VarChar(50)
+  user_id          Int?
+  total_amount     Decimal       @db.Decimal(10, 2)
+  status           String?       @default("Pending") @db.VarChar(50)
+  invoice_no       String?       @unique(map: "invoice_no") @db.VarChar(50)
+  shipping_address String?       @db.Text
+  created_at       DateTime?     @default(now()) @db.Timestamp(0)
+  viewed           Boolean?      @default(false)
+  payment_status   String?       @default("pending") @db.VarChar(50)
+  invoices         invoices[]
+  order_items      order_items[]
+  is_active Boolean @default(true)
+}
+
+model permissions {
+  id          Int     @id @default(autoincrement())
+  slug        String  @db.VarChar(100)
+  description String? @db.VarChar(255)
+  is_active Boolean @default(true)
+}
+
+model products {
+  id               Int       @id @default(autoincrement())
+  name             String    @db.VarChar(255)
+  slug             String?   @unique(map: "slug") @db.VarChar(255)
+  description      String?   @db.Text
+  price            Decimal   @db.Decimal(10, 2)
+  discount_percent Int?      @default(0)
+  sale_flag        Int?      @default(0) @db.TinyInt
+  stock_qty        Int?      @default(0)
+  category_ids     String?   @db.Text
+  image_urls       String?   @db.Text
+  brand            String?   @db.VarChar(100)
+  rating           Decimal?  @default(0.0) @db.Decimal(2, 1)
+  created_at       DateTime? @default(now()) @db.Timestamp(0)
+  specifications Json? @default("{}")
+  is_active Boolean @default(true)
+}
+
+model roles {
+  id             Int     @id @default(autoincrement())
+  name           String  @db.VarChar(50)
+  permission_ids String? @db.Text
+  is_active Boolean @default(true)
+}
+
+model tax_settings {
+  id           Int      @id @default(autoincrement())
+  tax_name     String   @db.VarChar(50)
+  rate_percent Decimal  @db.Decimal(5, 2)
+  is_active    Boolean? @default(true)
+}
+
+model users {
+  id            Int       @id @default(autoincrement())
+  name          String    @db.VarChar(255)
+  email         String    @unique(map: "email") @db.VarChar(255)
+  password_hash String    @db.VarChar(255)
+  phone         String?   @db.VarChar(20)
+  role_ids      String?   @db.Text
+  offer_ids     String?   @db.Text
+  address       String?   @db.Text
+  created_at    DateTime? @default(now()) @db.Timestamp(0)
+  is_active     Int?      @default(1) @db.TinyInt
+}
+
+enum ledger_type {
+  INVOICE
+  PAYMENT
+  REFUND
+  EXPENSE
+}
+
+model GlobalSettings {
+  id Int @id @default(autoincrement())
+  website_name String @default("AmazonClone")
+  logo_url String?
+  favicon_url String?
+  tax_rate Float @default(0)
+  country String @default("KW")
+  is_active Boolean @default(true)
+}
+
+model Store {
+  id Int @id @default(autoincrement())
+  name String
+  description String?
+  logo_url String?
+  created_at DateTime @default(now())
+  is_active Boolean @default(true)
+}
+
+model PageContent {
+  id          Int      @id @default(autoincrement())
+  section_key String   @unique
+  content_en  Json     @default("{}")
+  content_ar  Json     @default("{}")
+  updated_at  DateTime @updatedAt
+  is_active Boolean @default(true)
+}
+
+model reviews {
+  id         Int      @id @default(autoincrement())
+  product_id Int
+  user_id    Int
+  user_name  String
+  rating     Int
+  comment    String   @db.Text
+  created_at DateTime @default(now())
+  is_active Boolean @default(true)
+}
+
+model quotations {
+  id           Int      @id @default(autoincrement())
+  customer_name String
+  email        String?
+  total_amount Decimal  @db.Decimal(10,2)
+  status       String   @default("Pending")
+  items        Json     
+  created_at   DateTime @default(now())
+  is_active Boolean @default(true)
+}
+
+model purchase_orders {
+  id           Int      @id @default(autoincrement())
+  supplier_name String
+  total_amount Decimal  @db.Decimal(10,2)
+  status       String   @default("Draft")
+  items        Json     
+  created_at   DateTime @default(now())
+  is_active Boolean @default(true)
+}

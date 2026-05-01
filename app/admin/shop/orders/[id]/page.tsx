@@ -84,23 +84,23 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
     }
   };
 
-  if (loading) return <div className="p-20 text-center"><Loader2 className="animate-spin mx-auto text-blue-600"/></div>;
-  if (!order) return <div className="p-20 text-center text-red-500">Order not found via API. Check your order ID.</div>;
+  if (loading) return <div className="text-black p-20 text-center"><Loader2 className="text-black animate-spin mx-auto text-blue-600"/></div>;
+  if (!order) return <div className="text-black p-20 text-center text-red-500">Order not found via API. Check your order ID.</div>;
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <div className="text-black p-6 max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <Link href="/admin/orders" className="flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium">
+      <div className="text-black flex items-center justify-between">
+        <Link href="/admin/orders" className="text-black flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium">
             <ArrowLeft size={20}/> Back to Orders
         </Link>
         
         {/* ACTION BUTTONS */}
-        <div className="flex gap-3">
+        <div className="text-black flex gap-3">
             {invoice ? (
                 <button 
                     onClick={() => setShowInvoiceModal(true)}
-                    className="flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 font-bold shadow-sm transition-all"
+                    className="text-black flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 font-bold shadow-sm transition-all"
                 >
                     <Printer size={18}/> View Invoice #{invoice.invoice_number}
                 </button>
@@ -108,9 +108,9 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
                 <button 
                     onClick={generateInvoice} 
                     disabled={generating}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 font-bold shadow-sm transition-all disabled:opacity-50"
+                    className="text-black flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 font-bold shadow-sm transition-all disabled:opacity-50"
                 >
-                    {generating ? <Loader2 className="animate-spin" size={18}/> : <FileText size={18}/>} 
+                    {generating ? <Loader2 className="text-black animate-spin" size={18}/> : <FileText size={18}/>} 
                     Generate Invoice
                 </button>
             )}
@@ -118,105 +118,105 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
       </div>
 
       {/* Order Info Card */}
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-        <div className="flex justify-between items-start mb-6">
+      <div className="text-black bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+        <div className="text-black flex justify-between items-start mb-6">
             <div>
-                <h1 className="text-3xl font-bold text-slate-900">Order #{order.id}</h1>
-                <p className="text-slate-500 mt-1">Placed on {new Date(order.created_at).toLocaleDateString()}</p>
+                <h1 className="text-black text-3xl font-bold text-slate-900">Order #{order.id}</h1>
+                <p className="text-black text-slate-500 mt-1">Placed on {new Date(order.created_at).toLocaleDateString()}</p>
             </div>
             <div className={`px-4 py-1.5 rounded-full text-sm font-bold capitalize ${order.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                 {order.status}
             </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 pt-6 border-t border-slate-100">
+        <div className="text-black grid md:grid-cols-3 gap-8 pt-6 border-t border-slate-100">
             <div>
-                <h3 className="text-xs font-bold text-slate-400 uppercase mb-2">Customer</h3>
-                <p className="font-medium text-slate-900">{order.customer_name}</p>
-                <p className="text-slate-500 text-sm">{order.customer_email}</p>
+                <h3 className="text-black text-xs font-bold text-slate-400 uppercase mb-2">Customer</h3>
+                <p className="text-black font-medium text-slate-900">{order.customer_name}</p>
+                <p className="text-black text-slate-500 text-sm">{order.customer_email}</p>
             </div>
             <div>
-                <h3 className="text-xs font-bold text-slate-400 uppercase mb-2">Shipping To</h3>
-                <p className="font-medium text-slate-900">{order.shipping_address || "N/A"}</p>
+                <h3 className="text-black text-xs font-bold text-slate-400 uppercase mb-2">Shipping To</h3>
+                <p className="text-black font-medium text-slate-900">{order.shipping_address || "N/A"}</p>
             </div>
             <div>
-                <h3 className="text-xs font-bold text-slate-400 uppercase mb-2">Total Amount</h3>
-                <p className="text-2xl font-bold text-slate-900">${Number(order.total_amount).toFixed(2)}</p>
+                <h3 className="text-black text-xs font-bold text-slate-400 uppercase mb-2">Total Amount</h3>
+                <p className="text-black text-2xl font-bold text-slate-900">${Number(order.total_amount).toFixed(2)}</p>
             </div>
         </div>
       </div>
 
       {/* --- INVOICE MODAL (Hidden until clicked) --- */}
       {showInvoiceModal && invoice && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="flex justify-between items-center p-4 border-b bg-slate-50">
-                    <h3 className="font-bold text-lg text-slate-800">Invoice Preview</h3>
-                    <div className="flex gap-3">
-                        <button onClick={printInvoice} className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800">
+        <div className="text-black fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="text-black bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="text-black flex justify-between items-center p-4 border-b bg-slate-50">
+                    <h3 className="text-black font-bold text-lg text-slate-800">Invoice Preview</h3>
+                    <div className="text-black flex gap-3">
+                        <button onClick={printInvoice} className="text-black flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800">
                             <Printer size={16}/> Print Slip
                         </button>
-                        <button onClick={() => setShowInvoiceModal(false)} className="text-slate-500 hover:text-red-600 px-3 font-medium">Close</button>
+                        <button onClick={() => setShowInvoiceModal(false)} className="text-black text-slate-500 hover:text-red-600 px-3 font-medium">Close</button>
                     </div>
                 </div>
                 
                 {/* PRINTABLE SLIP CONTENT */}
-                <div className="overflow-y-auto p-8 bg-white" id="invoice-slip">
-                    <div className="border-2 border-slate-900 p-8">
+                <div className="text-black overflow-y-auto p-8 bg-white" id="invoice-slip">
+                    <div className="text-black border-2 border-slate-900 p-8">
                         {/* Header */}
-                        <div className="flex justify-between items-start mb-12">
+                        <div className="text-black flex justify-between items-start mb-12">
                             <div>
-                                <h1 className="text-4xl font-black text-slate-900 tracking-tight">INVOICE</h1>
-                                <p className="text-slate-500 mt-2 font-mono">{invoice.invoice_number}</p>
+                                <h1 className="text-black text-4xl font-black text-slate-900 tracking-tight">INVOICE</h1>
+                                <p className="text-black text-slate-500 mt-2 font-mono">{invoice.invoice_number}</p>
                             </div>
-                            <div className="text-right">
-                                <h2 className="font-bold text-xl text-slate-900">AMAZON CLONE</h2>
-                                <p className="text-sm text-slate-500">123 Tech Park, Silicon Valley</p>
-                                <p className="text-sm text-slate-500">support@amazonclone.com</p>
+                            <div className="text-black text-right">
+                                <h2 className="text-black font-bold text-xl text-slate-900">AMAZON CLONE</h2>
+                                <p className="text-black text-sm text-slate-500">123 Tech Park, Silicon Valley</p>
+                                <p className="text-black text-sm text-slate-500">support@amazonclone.com</p>
                             </div>
                         </div>
 
                         {/* Bill To */}
-                        <div className="flex justify-between mb-12">
+                        <div className="text-black flex justify-between mb-12">
                             <div>
-                                <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">Billed To</h4>
-                                <p className="font-bold text-lg text-slate-900">{invoice.customer_name}</p>
-                                <p className="text-slate-600 max-w-xs">{invoice.customer_address}</p>
+                                <h4 className="text-black text-xs font-bold text-slate-400 uppercase mb-2">Billed To</h4>
+                                <p className="text-black font-bold text-lg text-slate-900">{invoice.customer_name}</p>
+                                <p className="text-black text-slate-600 max-w-xs">{invoice.customer_address}</p>
                             </div>
-                            <div className="text-right">
-                                <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">Date Issued</h4>
-                                <p className="font-bold text-lg text-slate-900">{new Date(invoice.created_at).toLocaleDateString()}</p>
+                            <div className="text-black text-right">
+                                <h4 className="text-black text-xs font-bold text-slate-400 uppercase mb-2">Date Issued</h4>
+                                <p className="text-black font-bold text-lg text-slate-900">{new Date(invoice.created_at).toLocaleDateString()}</p>
                             </div>
                         </div>
 
                         {/* Line Items */}
-                        <table className="w-full mb-12">
+                        <table className="text-black w-full mb-12">
                             <thead className="border-b-2 border-slate-900">
                                 <tr>
-                                    <th className="text-left py-3 font-bold text-slate-900">Description</th>
-                                    <th className="text-right py-3 font-bold text-slate-900">Amount</th>
+                                    <th className="text-black font-extrabold uppercase text-left py-3 font-bold text-slate-900">Description</th>
+                                    <th className="text-black font-extrabold uppercase text-right py-3 font-bold text-slate-900">Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td className="py-4 border-b border-slate-200">Order #{invoice.order_id} - Full Payment</td>
-                                    <td className="py-4 border-b border-slate-200 text-right font-mono">${Number(invoice.total_amount).toFixed(2)}</td>
+                                    <td className="text-black py-4 border-b border-slate-200">Order #{invoice.order_id} - Full Payment</td>
+                                    <td className="text-black py-4 border-b border-slate-200 text-right font-mono">${Number(invoice.total_amount).toFixed(2)}</td>
                                 </tr>
                             </tbody>
                         </table>
 
                         {/* Totals */}
-                        <div className="flex justify-end">
-                            <div className="w-64 space-y-3">
-                                <div className="flex justify-between text-slate-600">
+                        <div className="text-black flex justify-end">
+                            <div className="text-black w-64 space-y-3">
+                                <div className="text-black flex justify-between text-slate-600">
                                     <span>Subtotal</span>
                                     <span>${(Number(invoice.total_amount) - Number(invoice.tax_amount)).toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between text-slate-600">
+                                <div className="text-black flex justify-between text-slate-600">
                                     <span>Tax (18%)</span>
                                     <span>${Number(invoice.tax_amount).toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between text-xl font-bold text-slate-900 border-t-2 border-slate-900 pt-3">
+                                <div className="text-black flex justify-between text-xl font-bold text-slate-900 border-t-2 border-slate-900 pt-3">
                                     <span>Total Due</span>
                                     <span>${Number(invoice.total_amount).toFixed(2)}</span>
                                 </div>
@@ -224,7 +224,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
                         </div>
 
                         {/* Footer */}
-                        <div className="mt-16 pt-8 border-t border-slate-200 text-center text-sm text-slate-400">
+                        <div className="text-black mt-16 pt-8 border-t border-slate-200 text-center text-sm text-slate-400">
                             <p>Thank you for your business.</p>
                         </div>
                     </div>

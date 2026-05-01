@@ -3,118 +3,115 @@
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useCurrency } from "@/context/CurrencyContext";
+import { useSettings } from "@/context/SettingsContext";
+import { useWishlist } from "@/context/WishlistContext";
+import { useShopFilter } from "@/context/ShopFilterContext";
 import CartDrawer from "./CartDrawer";
 import Link from "next/link";
-import { FaShoppingCart, FaSearch, FaBars, FaUser, FaSignOutAlt, FaCog } from "react-icons/fa";
+import { FaShoppingCart, FaUser, FaSignOutAlt, FaCog, FaGlobe, FaMoneyBillWave, FaBars, FaHeart } from "react-icons/fa";
 import SearchBar from "./SearchBar";
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  
   const { totalItems } = useCart(); 
-  const { user, logout } = useAuth(); // Hook into Auth
-
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Shop", href: "/shop" },
-    { name: "Sales", href: "/shop?filter=sale" },
-    { name: "Contact", href: "/contact" },
-  ];
-
-  const getInitials = (name: string) => {
-    return name ? name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
-  };
+  const { wishlist } = useWishlist();
+  const { user, logout } = useAuth();
+  const { lang, setLang, t } = useLanguage();
+  const { currency, setCurrency } = useCurrency();
+  const { settings } = useSettings();
+  const { clearFilters } = useShopFilter();
 
   return (
     <>
-      <header className="sticky top-0 z-30 bg-gray-900 text-white shadow-md">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-slate-900 text-white shadow-md">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
           
-          <Link href="/" className="text-2xl font-bold text-white tracking-wide shrink-0">
-            Amazon<span className="text-yellow-400">Clone</span>
+          {/* LOGO */}
+          <Link href="/" onClick={clearFilters} className="text-xl font-bold flex items-center gap-2 shrink-0">
+            {settings?.logo_url ? (
+              <img src={settings.logo_url} alt="Logo" className="h-8 object-contain" />
+            ) : (
+              <span className="text-yellow-400">{settings?.website_name || "AmazonClone"}</span>
+            )}
           </Link>
 
-          {/* THE NEW AMAZON SEARCH BAR */}
-          <SearchBar />
+          {/* SEARCH & NAV */}
+          <div className="flex-1 flex items-center gap-6">
+            <div className="flex-1 max-w-2xl">
+              <SearchBar />
+            </div>
+            <nav className="hidden xl:flex items-center space-x-6 text-sm font-bold uppercase tracking-wider">
+              <Link href="/shop" onClick={clearFilters} className="hover:text-yellow-400 transition-colors">Shop</Link>
+              <Link href="/contact" className="hover:text-yellow-400 transition-colors">Contact</Link>
+            </nav>
+          </div>
 
+          {/* RIGHT ICONS */}
           <div className="flex items-center space-x-5 shrink-0">
-
-            {/* DYNAMIC USER SECTION */}
-            {user ? (
-              <div className="relative">
-                <button 
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center gap-2 focus:outline-none"
-                >
-                  <div className="w-8 h-8 rounded-full bg-yellow-400 text-gray-900 font-bold flex items-center justify-center hover:bg-white transition-colors">
-                    {getInitials(user.name)}
-                  </div>
-                  <span className="hidden sm:block text-sm font-medium hover:text-yellow-400">
-                    {user.name.split(' ')[0]}
-                  </span>
-                </button>
-
-                {isProfileOpen && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setIsProfileOpen(false)} />
-                    <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl py-2 z-20 text-gray-800 animate-in fade-in slide-in-from-top-2 border border-gray-100">
-                      <div className="px-4 py-2 border-b border-gray-100 mb-1">
-                        <p className="text-xs text-gray-500">Signed in as</p>
-                        <p className="font-bold truncate text-sm">{user.email}</p>
-                      </div>
-                      <Link href="/profile" className="px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm">
-                        <FaUser className="text-gray-400"/> My Profile
-                      </Link>
-                      {user.role_ids === 'admin' && (
-                        <Link href="/admin/dashboard" className="px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm text-blue-600">
-                           <FaCog /> Admin Dashboard
-                        </Link>
-                      )}
-                      <button 
-                        onClick={() => { logout(); setIsProfileOpen(false); }}
-                        className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 flex items-center gap-2 text-sm mt-1 border-t border-gray-100 font-medium"
-                      >
-                        <FaSignOutAlt /> Logout
-                      </button>
-                    </div>
-                  </>
-                )}
+            {/* Lang/Currency */}
+            <div className="hidden lg:flex items-center gap-4 border-r border-slate-700 pr-4 text-xs font-bold">
+              <div className="flex items-center gap-1">
+                <FaGlobe className="text-yellow-400"/>
+                <select value={lang} onChange={(e) => setLang(e.target.value)} className="bg-transparent outline-none text-white cursor-pointer">
+                  <option value="en" className="text-black">EN</option>
+                  <option value="ar" className="text-black">AR</option>
+                </select>
               </div>
-            ) : (
-              <Link href="/login" className="flex items-center space-x-1 hover:text-yellow-400 text-sm font-medium">
-                <FaUser /> <span className="hidden sm:inline">Login</span>
-              </Link>
-            )}
+              <div className="flex items-center gap-1">
+                <FaMoneyBillWave className="text-yellow-400"/>
+                <select value={currency} onChange={(e) => setCurrency(e.target.value as any)} className="bg-transparent outline-none text-white cursor-pointer">
+                  <option value="USD" className="text-black">USD</option>
+                  <option value="KWD" className="text-black">KWD</option>
+                </select>
+              </div>
+            </div>
 
-            <button onClick={() => setIsCartOpen(true)} className="relative flex items-center hover:text-yellow-400 transition-colors">
-              <FaShoppingCart size={24} />
+            {/* Wishlist */}
+            <Link href="/wishlist" className="relative hover:text-yellow-400">
+              <FaHeart size={22} />
+              {wishlist?.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-yellow-400 text-slate-900 text-[10px] font-black rounded-full h-4 w-4 flex items-center justify-center">
+                  {wishlist.length}
+                </span>
+              )}
+            </Link>
+
+            {/* Profile */}
+            <div className="relative">
+              <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-yellow-400 text-slate-900 flex items-center justify-center font-bold">
+                  {user ? user.name[0].toUpperCase() : <FaUser size={14}/>}
+                </div>
+              </button>
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-3 w-48 bg-white text-slate-900 rounded-xl shadow-xl py-2 border border-slate-100 z-50">
+                  {user ? (
+                    <>
+                      <Link href="/profile" className="block px-4 py-2 hover:bg-slate-50 font-bold">My Profile</Link>
+                      <button onClick={logout} className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 font-bold">Logout</button>
+                    </>
+                  ) : (
+                    <Link href="/login" className="block px-4 py-2 hover:bg-slate-50 font-bold">Login</Link>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Cart */}
+            <button onClick={() => setIsCartOpen(true)} className="relative hover:text-yellow-400">
+              <FaShoppingCart size={22} />
               {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-yellow-400 text-black text-[11px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-yellow-400 text-slate-900 text-[10px] font-black rounded-full h-4 w-4 flex items-center justify-center">
                   {totalItems}
                 </span>
               )}
             </button>
-
-            <button className="md:hidden text-xl" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              <FaBars />
-            </button>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden bg-gray-800 py-2 border-t border-gray-700">
-            {navLinks.map((link) => (
-              <Link key={link.name} href={link.href} className="block px-4 py-3 text-sm font-medium text-gray-200 hover:bg-gray-700 hover:text-yellow-400" onClick={() => setIsMobileMenuOpen(false)}>
-                {link.name}
-              </Link>
-            ))}
-          </div>
-        )}
       </header>
-
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );

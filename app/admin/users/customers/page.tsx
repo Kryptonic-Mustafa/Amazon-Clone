@@ -1,309 +1,134 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Search, 
-  User,
-  X,
-  Phone,
-  MapPin,
-  CheckCircle,
-  XCircle
-} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { apiCall } from '@/lib/apiClient';
+import { Users, Edit, Trash2, X, Plus } from 'lucide-react';
+import { useAdminLocale } from '@/context/AdminLocaleContext';
+import Swal from 'sweetalert2';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
-// Matches your 'users' table schema
-type Customer = {
-  id: number;
-  name: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  is_active: number; // 1 or 0
-  created_at?: string;
-};
-
-export default function CustomersPage() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
+export default function AdminCustomersPage() {
+  const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const { t, isRTL, locale } = useAdminLocale();
 
-  // Form State
-  const [formData, setFormData] = useState({ 
-    name: '', 
-    email: '', 
-    password: '', 
-    phone: '', 
-    address: '', 
-    is_active: 1 
-  });
-
-  // 1. Fetch Data
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', address: '' });
 
   const fetchCustomers = async () => {
-    try {
-      const res = await fetch('/api/admin/customers');
-      const data = await res.json();
-      
-      if (Array.isArray(data)) {
-        setCustomers(data);
-      } else {
-        console.error("API Error:", data);
-        setCustomers([]);
-      }
-    } catch (error) {
-      console.error('Failed to fetch customers', error);
-      setCustomers([]);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    const data = await apiCall('/api/admin/users/customers');
+    if (data) setCustomers(data);
+    setLoading(false);
   };
 
-  // 2. Filter Logic
-  const filteredCustomers = Array.isArray(customers) ? customers.filter(c => 
-    (c.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-    (c.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-    (c.phone?.includes(searchTerm))
-  ) : [];
+  useEffect(() => { fetchCustomers(); }, []);
 
-  // 3. Handle Submit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const url = editingCustomer 
-      ? `/api/admin/customers/${editingCustomer.id}` 
-      : '/api/admin/customers';
-    const method = editingCustomer ? 'PUT' : 'POST';
-
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (!res.ok) throw new Error('Failed');
-
-      fetchCustomers();
-      closeModal();
-    } catch (error) {
-      alert('Error saving customer');
+  const openModal = (customer: any = null) => {
+    if (customer) {
+      setEditingId(customer.id);
+      setFormData({ name: customer.name, email: customer.email, phone: customer.phone || '', address: customer.address || '' });
+    } else {
+      setEditingId(null);
+      setFormData({ name: '', email: '', phone: '', address: '' });
     }
-  };
-
-  // 4. Handle Delete
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure? This will delete the customer.')) return;
-    try {
-      await fetch(`/api/admin/customers/${id}`, { method: 'DELETE' });
-      setCustomers(prev => prev.filter(c => c.id !== id));
-    } catch (error) {
-      alert('Error deleting');
-    }
-  };
-
-  // Helpers
-  const openEditModal = (c: Customer) => {
-    setEditingCustomer(c);
-    setFormData({ 
-      name: c.name, 
-      email: c.email, 
-      password: '', // Don't show hash, allow blank to keep current
-      phone: c.phone || '', 
-      address: c.address || '', 
-      is_active: c.is_active 
-    });
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setEditingCustomer(null);
-    setFormData({ name: '', email: '', password: '', phone: '', address: '', is_active: 1 });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const url = editingId ? `/api/admin/users/customers?id=${editingId}` : '/api/admin/users/customers';
+    const method = editingId ? 'PUT' : 'POST';
+    const res = await apiCall(url, { method, body: formData, showSuccessToast: true, successMessage: editingId ? 'Customer Updated!' : 'Customer Saved!' });
+    if (res) { setIsModalOpen(false); fetchCustomers(); }
   };
 
+  const handleDelete = async (id: number) => {
+    const result = await Swal.fire({ title: 'Are you sure?', text: "This will archive the customer.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444' });
+    if (result.isConfirmed) {
+      await apiCall(`/api/admin/users/customers?id=${id}`, { method: 'DELETE', showSuccessToast: true, successMessage: 'Customer Archived!' });
+      fetchCustomers();
+    }
+  };
+
+  if (loading) return <div className="p-8 text-center font-bold text-slate-500">Loading customers...</div>;
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-          <User className="text-blue-600" />
-          Customer Management
-        </h1>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition"
-        >
-          <Plus size={18} /> Add Customer
+    <div className="p-6 md:p-8 bg-slate-50 min-h-screen text-slate-900">
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-3">
+            <div className="bg-purple-100 p-3 rounded-xl shadow-sm text-purple-600"><Users size={24} /></div>
+            <h1 className="text-3xl font-black tracking-tight">{t('Customer Management')}</h1>
+        </div>
+        <button onClick={() => openModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95">
+          <Plus size={20} /> {t('Add New Customer')}
         </button>
       </div>
 
-      {/* Search */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-        <div className="relative">
-          <Search className="absolute left-3 top-3 text-slate-400" size={20} />
-          <input 
-            type="text" 
-            placeholder="Search by name, email, or phone..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         <table className="w-full text-left">
-          <thead className="bg-slate-50 border-b border-slate-200">
+          <thead className="bg-slate-900 text-white">
             <tr>
-              <th className="px-6 py-4 font-semibold text-slate-600">Customer</th>
-              <th className="px-6 py-4 font-semibold text-slate-600">Contact</th>
-              <th className="px-6 py-4 font-semibold text-slate-600">Status</th>
-              <th className="px-6 py-4 font-semibold text-slate-600 text-right">Actions</th>
+              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Customer Name')}</th>
+              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Email')}</th>
+              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Phone')}</th>
+              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Joined')}</th>
+              <th className={`px-6 py-4 font-bold uppercase tracking-widest text-xs ${isRTL ? 'text-left' : 'text-right'}`}>{t('Action')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {loading ? (
-              <tr><td colSpan={4} className="p-8 text-center text-slate-500">Loading...</td></tr>
-            ) : filteredCustomers.length === 0 ? (
-              <tr><td colSpan={4} className="p-8 text-center text-slate-500">No customers found.</td></tr>
-            ) : (
-              filteredCustomers.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50 transition">
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-slate-900">{c.name}</div>
-                    <div className="text-sm text-slate-500">{c.email}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-slate-600 text-sm">
-                      <Phone size={14} /> {c.phone || 'N/A'}
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-600 text-sm mt-1">
-                      <MapPin size={14} /> {c.address ? (c.address.length > 20 ? c.address.substring(0,20)+'...' : c.address) : 'N/A'}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    {c.is_active === 1 ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <CheckCircle size={12} /> Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        <XCircle size={12} /> Inactive
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    <button onClick={() => openEditModal(c)} className="text-slate-400 hover:text-blue-600">
-                      <Edit size={18} />
-                    </button>
-                    <button onClick={() => handleDelete(c.id)} className="text-slate-400 hover:text-red-600">
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
+          <tbody className="divide-y divide-slate-100 font-medium">
+            {customers.map(c => (
+              <tr key={c.id} className="hover:bg-slate-50 transition-colors">
+                <td className="px-6 py-4 font-bold text-slate-900">{c.name}</td>
+                <td className="px-6 py-4 text-slate-600">{c.email}</td>
+                <td className="px-6 py-4 text-slate-600" dir="ltr">{c.phone || '-'}</td>
+                <td className="px-6 py-4 text-sm text-slate-500">{new Date(c.created_at).toLocaleDateString(locale)}</td>
+                <td className={`px-6 py-4 ${isRTL ? 'text-left' : 'text-right'}`}>
+                  {/* FIXED WIRED BUTTONS */}
+                  <button onClick={() => openModal(c)} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg transition-colors"><Edit size={18}/></button>
+                  <button onClick={() => handleDelete(c.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-            <div className="flex justify-between items-center p-6 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-800">
-                {editingCustomer ? 'Edit Customer' : 'Add New Customer'}
-              </h3>
-              <button onClick={closeModal} className="text-slate-400 hover:text-slate-600">
-                <X size={24} />
-              </button>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
+            <div className="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+                <h2 className="text-lg font-bold">{editingId ? 'Edit Customer' : t('Add New Customer')}</h2>
+                <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white"><X size={20}/></button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="p-8">
+              <div className="grid grid-cols-2 gap-6 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                  <input 
-                    type="text" 
-                    required
-                    className="w-full px-3 py-2 border rounded-lg text-slate-900"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  />
+                    <label className="block text-sm font-bold mb-2 text-slate-700">Full Name</label>
+                    <input required value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                  <input 
-                    type="text" 
-                    className="w-full px-3 py-2 border rounded-lg text-slate-900"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  />
+                    <label className="block text-sm font-bold mb-2 text-slate-700">Phone Number</label>
+                    <div className="phone-input-wrapper" dir="ltr">
+                      <PhoneInput defaultCountry={locale === 'ar-KW' ? 'kw' : 'in'} value={formData.phone} onChange={(phone) => setFormData({...formData, phone})} inputClassName="w-full !border-slate-300 !rounded-r-xl !px-4 !py-2.5 !outline-none focus:!ring-2 focus:!ring-blue-500 !font-medium !text-slate-900" countrySelectorStyleProps={{ buttonClassName: "!border-slate-300 !rounded-l-xl !px-3 !bg-slate-50" }} />
+                    </div>
                 </div>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                <input 
-                  type="email" 
-                  required
-                  className="w-full px-3 py-2 border rounded-lg text-slate-900"
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                />
+              <div className="mb-6">
+                <label className="block text-sm font-bold mb-2 text-slate-700">Email Address</label>
+                <input required type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium" />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
-                <textarea 
-                  className="w-full px-3 py-2 border rounded-lg text-slate-900"
-                  rows={2}
-                  value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
-                />
+              <div className="mb-8">
+                <label className="block text-sm font-bold mb-2 text-slate-700">Home Address</label>
+                <textarea rows={3} value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium" />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Password {editingCustomer && <span className="text-xs text-slate-400">(Leave blank to keep)</span>}
-                  </label>
-                  <input 
-                    type="password" 
-                    required={!editingCustomer}
-                    className="w-full px-3 py-2 border rounded-lg text-slate-900"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
-                  <select 
-                    className="w-full px-3 py-2 border rounded-lg text-slate-900"
-                    value={formData.is_active}
-                    onChange={(e) => setFormData({...formData, is_active: Number(e.target.value)})}
-                  >
-                    <option value={1}>Active</option>
-                    <option value={0}>Inactive</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="pt-4 flex gap-3">
-                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-slate-700">Cancel</button>
-                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Customer</button>
+              
+              <div className="flex justify-end gap-3 border-t border-slate-100 pt-6">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 font-bold text-slate-500 hover:text-slate-800 transition-colors">Cancel</button>
+                  <button type="submit" className="bg-blue-600 text-white px-8 py-2.5 rounded-xl font-bold shadow-md hover:bg-blue-700 transition-colors">{editingId ? 'Update Customer' : 'Save Customer'}</button>
               </div>
             </form>
           </div>
