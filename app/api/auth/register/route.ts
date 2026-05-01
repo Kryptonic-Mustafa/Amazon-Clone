@@ -1,28 +1,45 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
-import { hashPassword } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const { name, email, password, phone, address } = await req.json();
 
-    // Check if user exists
-    const [existing]: any = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (existing.length > 0) {
-      return NextResponse.json({ error: 'User already exists' }, { status: 400 });
+    if (!name || !email || !password) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const hashedPassword = await hashPassword(password);
-    
-    // Default role_id '3' (Customer) - assuming 1=Admin, 2=Manager, 3=Customer
-    // Storing as string "3"
-    await pool.query(
-      'INSERT INTO users (name, email, password_hash, role_ids) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword, "3"]
-    );
+    // 1. Check if user already exists
+    const existingUser = await prisma.users.findFirst({
+      where: { email }
+    });
 
-    return NextResponse.json({ message: 'User registered successfully' });
+    if (existingUser) {
+      return NextResponse.json({ error: 'User already exists with this email.' }, { status: 400 });
+    }
+
+    // 2. Hash the password for security
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 3. Create the user using Prisma
+    const user = await prisma.users.create({
+      data: {
+        name,
+        email,
+        password_hash: hashedPassword,
+        phone: phone || null,
+        address: address || null,
+        is_active: 1
+      }
+    });
+
+    // 4. Return success (excluding the password hash)
+    const { password_hash, ...userWithoutPassword } = user;
+    return NextResponse.json({ message: 'User registered successfully', user: userWithoutPassword }, { status: 201 });
+
   } catch (error) {
+    console.error("🚨 Registration Error:", error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

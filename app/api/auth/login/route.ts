@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-this-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key_change_this';
 
 export async function POST(req: Request) {
   try {
@@ -14,32 +14,44 @@ export async function POST(req: Request) {
     }
 
     // 1. Find user in TiDB
-    const user = await prisma.users.findUnique({ where: { email } });
+    const user = await prisma.users.findFirst({
+      where: { email, is_active: 1 }
+    });
+
     if (!user) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // 2. Verify hashed password (assuming passwords in DB are bcrypt hashed)
-    // NOTE: If your current DB passwords are raw text, we will need to hash them first!
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash || '');
+    // 2. Verify hashed password
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // 3. Generate secure JWT Token
+    // 3. Generate Session Token
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: 'customer' },
+      { userId: user.id, email: user.email, name: user.name },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    // 4. Return user data (excluding password)
-    const { password_hash, ...safeUser } = user;
-    
-    return NextResponse.json({ user: safeUser, token }, { status: 200 });
+    const response = NextResponse.json({ 
+      message: 'Login successful', 
+      user: { id: user.id, name: user.name, email: user.email } 
+    }, { status: 200 });
+
+    // 4. Set secure cookie
+    response.cookies.set('user_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7 // 7 days
+    });
+
+    return response;
 
   } catch (error) {
-    console.error("Login Error:", error);
+    console.error("🚨 Login Error:", error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
