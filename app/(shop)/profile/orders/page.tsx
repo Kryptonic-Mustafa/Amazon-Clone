@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
-import { Package, Clock, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Package, Clock, ShoppingBag, ArrowRight, RotateCcw, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function MyOrdersPage() {
@@ -12,6 +12,14 @@ export default function MyOrdersPage() {
   const router = useRouter();
   const { clearCart, addToCart } = useCart();
 
+  // Return Logic State
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [returnReason, setReturnReason] = useState('');
+  const [returnQty, setReturnQty] = useState(1);
+  const [submittingReturn, setSubmittingReturn] = useState(false);
+
   useEffect(() => {
     fetch('/api/shop/orders/mine')
       .then(res => res.json())
@@ -19,6 +27,45 @@ export default function MyOrdersPage() {
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleReturnRequest = (order: any, item: any) => {
+    setSelectedOrder(order);
+    setSelectedItem(item);
+    setReturnQty(item.quantity);
+    setShowReturnModal(true);
+  };
+
+  const submitReturn = async () => {
+    if (!returnReason.trim()) return toast.error("Please provide a reason for return");
+    setSubmittingReturn(true);
+    try {
+      const res = await fetch('/api/shop/returns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: selectedOrder.id,
+          product_id: selectedItem.product_id,
+          product_name: selectedItem.product_name,
+          quantity: returnQty,
+          return_reason: returnReason
+        })
+      });
+
+      if (res.ok) {
+        toast.success("Return request submitted successfully!");
+        setShowReturnModal(false);
+        setReturnReason('');
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to submit return request");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+    } finally {
+      setSubmittingReturn(false);
+    }
+  };
+
 
   // --- LOGIC: ORDER AGAIN ---
   const handleOrderAgain = (orderItems: any[]) => {
@@ -99,7 +146,17 @@ export default function MyOrdersPage() {
                         <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                       </div>
                     </div>
-                    <p className="font-medium text-gray-900">${Number(item.price).toFixed(2)}</p>
+                    <div className="flex flex-col items-end gap-2">
+                       <p className="font-medium text-gray-900">${Number(item.price).toFixed(2)}</p>
+                       {order.status === 'Completed' && (
+                         <button 
+                           onClick={() => handleReturnRequest(order, item)}
+                           className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1"
+                         >
+                           <RotateCcw size={12} /> Return
+                         </button>
+                       )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -116,6 +173,63 @@ export default function MyOrdersPage() {
           </div>
         ))
       )}
+
+      {/* RETURN MODAL */}
+      {showReturnModal && (
+        <>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" onClick={() => setShowReturnModal(false)} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl z-50 w-full max-w-md overflow-hidden animate-in zoom-in-95">
+            <div className="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <RotateCcw size={20} className="text-yellow-400" />
+                Return Request
+              </h3>
+              <button onClick={() => setShowReturnModal(false)}><X size={20}/></button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Product</p>
+                <p className="font-bold text-slate-900">{selectedItem?.product_name}</p>
+                <p className="text-xs text-slate-500 mt-1">From Order #{selectedOrder?.id}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Return Quantity</label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  max={selectedItem?.quantity}
+                  value={returnQty}
+                  onChange={(e) => setReturnQty(parseInt(e.target.value))}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Reason for Return</label>
+                <textarea 
+                  rows={3}
+                  placeholder="Tell us why you want to return this product..."
+                  value={returnReason}
+                  onChange={(e) => setReturnReason(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none font-medium resize-none"
+                />
+              </div>
+
+              <div className="pt-2">
+                <button 
+                  disabled={submittingReturn}
+                  onClick={submitReturn}
+                  className="w-full bg-slate-900 text-white font-black py-3.5 rounded-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {submittingReturn ? "Submitting..." : "Submit Return Request"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
-}
+}

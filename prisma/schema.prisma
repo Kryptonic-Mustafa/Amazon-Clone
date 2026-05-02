@@ -105,8 +105,26 @@ model orders {
   payment_status   String?       @default("pending") @db.VarChar(50)
   invoices         invoices[]
   order_items      order_items[]
+  sales_returns    sales_returns[]
   is_active Boolean @default(true)
 }
+
+model sales_returns {
+  id              Int      @id @default(autoincrement())
+  order_id        Int
+  user_id         Int
+  product_id      Int
+  product_name    String
+  quantity        Int
+  return_reason   String   @db.Text
+  status          String   @default("Pending") 
+  refund_amount   Decimal? @db.Decimal(10, 2)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  is_active       Boolean  @default(true)
+  orders          orders   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+}
+
 
 model permissions {
   id          Int     @id @default(autoincrement())

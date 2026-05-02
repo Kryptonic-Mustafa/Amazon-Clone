@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
+  RotateCcw,
   LayoutDashboard, Package, ShoppingCart, 
   Users, Settings, FileText, MessageSquare, LogOut, 
   ClipboardList, FileSpreadsheet, Truck, Calculator, BookOpen 
@@ -20,6 +21,7 @@ export default function AdminSidebar() {
     { name: 'Inventory', href: '/admin/inventory', icon: ClipboardList },
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
+    { name: 'Sales Return', href: '/admin/sales-return', icon: RotateCcw },
     { name: 'Invoices', href: '/admin/invoices', icon: FileText },
     { name: 'Quotations', href: '/admin/quotations', icon: FileSpreadsheet },
     { name: 'Purchase Orders', href: '/admin/purchase-orders', icon: Truck },
