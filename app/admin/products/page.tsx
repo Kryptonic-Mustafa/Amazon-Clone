@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiCall } from '@/lib/apiClient';
-import { Plus, Edit, Trash2, X, Check, ChevronDown, Link as LinkIcon, Upload, Tag, ListTree, Award } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Check, ChevronDown, Link as LinkIcon, Upload, Tag, ListTree, Award, RotateCcw } from 'lucide-react';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
@@ -36,6 +36,11 @@ export default function AdminProductsPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [specs, setSpecs] = useState<{key: string, value: string}[]>([]);
 
+  // Search & Filter State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterBrand, setFilterBrand] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
@@ -47,7 +52,14 @@ export default function AdminProductsPage() {
     setLoading(false);
   };
 
-  // RESTORED LOGIC
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         (p.brand && p.brand.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesBrand = filterBrand === '' || p.brand === filterBrand;
+    const matchesCategory = filterCategory === '' || (p.category_ids && String(p.category_ids).split(',').includes(filterCategory));
+    return matchesSearch && matchesBrand && matchesCategory;
+  });
+
   const handleSaveBrand = async () => {
     if (!brandInput.trim()) return;
     const url = editingBrandId ? `/api/admin/brands?id=${editingBrandId}` : '/api/admin/brands';
@@ -140,6 +152,47 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
+      {/* SEARCH & FILTERS */}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row gap-4 items-center">
+        <div className="flex-1 w-full relative">
+          <input 
+            type="text" 
+            placeholder={t('Search products or brands...')} 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 pl-10 outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+          />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </span>
+        </div>
+        <div className="flex gap-4 w-full md:w-auto">
+          <select 
+            value={filterBrand}
+            onChange={(e) => setFilterBrand(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 font-bold text-sm min-w-[140px]"
+          >
+            <option value="">{t('All Brands')}</option>
+            {brands.map((b: any) => <option key={b.id} value={b.name}>{b.name}</option>)}
+          </select>
+          <select 
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 font-bold text-sm min-w-[140px]"
+          >
+            <option value="">{t('All Categories')}</option>
+            {categories.map((c: any) => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
+          </select>
+          <button 
+            onClick={fetchData}
+            className="p-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors"
+            title="Refresh Data"
+          >
+             <RotateCcw size={20} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
+      </div>
+
       {loading ? <AdminLoader text="Loading Products..." /> : (
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
           <table className="w-full text-left">
@@ -152,7 +205,7 @@ export default function AdminProductsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {products.map((p: any) => (
+              {filteredProducts.map((p: any) => (
                 <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 flex items-center gap-4">
                     <img src={p.image_urls ? p.image_urls.split(',')[0] : '/placeholder.png'} className="w-12 h-12 object-contain bg-white border border-slate-200 rounded-lg p-1" />

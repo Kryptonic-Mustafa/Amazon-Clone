@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiCall } from '@/lib/apiClient';
-import { Users, Edit, Trash2, X, Plus } from 'lucide-react';
+import { Users, Edit, Trash2, X, Plus, Search, RotateCcw } from 'lucide-react';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
 import Swal from 'sweetalert2';
 import { PhoneInput } from 'react-international-phone';
@@ -16,6 +16,9 @@ export default function AdminCustomersPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const { t, isRTL, locale } = useAdminLocale();
 
+  // Search State
+  const [searchTerm, setSearchTerm] = useState('');
+
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', address: '' });
 
   const fetchCustomers = async () => {
@@ -26,6 +29,12 @@ export default function AdminCustomersPage() {
   };
 
   useEffect(() => { fetchCustomers(); }, []);
+
+  const filteredCustomers = customers.filter(c => {
+    return c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+           c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           (c.phone && c.phone.includes(searchTerm));
+  });
 
   const openModal = (customer: any = null) => {
     if (customer) {
@@ -54,48 +63,71 @@ export default function AdminCustomersPage() {
     }
   };
 
-  if (loading) return <AdminLoader text="Loading Customers..." />;
-
   return (
-    <div className="p-6 md:p-8 bg-slate-50 min-h-screen text-slate-900">
-      <div className="flex justify-between items-center mb-8">
+    <div className="p-8 bg-slate-50 min-h-screen text-slate-900">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div className="flex items-center gap-3">
             <div className="bg-purple-100 p-3 rounded-xl shadow-sm text-purple-600"><Users size={24} /></div>
             <h1 className="text-3xl font-black tracking-tight">{t('Customer Management')}</h1>
         </div>
-        <button onClick={() => openModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95">
-          <Plus size={20} /> {t('Add New Customer')}
-        </button>
+        <div className="flex gap-3">
+          <button onClick={fetchCustomers} className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95">
+            <RotateCcw size={18} className={loading ? 'animate-spin' : ''} /> {t('Sync')}
+          </button>
+          <button onClick={() => openModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95">
+            <Plus size={20} /> {t('Add New')}
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-slate-900 text-white">
-            <tr>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Customer Name')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Email')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Phone')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Joined')}</th>
-              <th className={`px-6 py-4 font-bold uppercase tracking-widest text-xs ${isRTL ? 'text-left' : 'text-right'}`}>{t('Action')}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 font-medium">
-            {customers.map((c: any) => (
-              <tr key={c.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 font-bold text-slate-900">{c.name}</td>
-                <td className="px-6 py-4 text-slate-600">{c.email}</td>
-                <td className="px-6 py-4 text-slate-600" dir="ltr">{c.phone || '-'}</td>
-                <td className="px-6 py-4 text-sm text-slate-500">{new Date(c.created_at).toLocaleDateString(locale)}</td>
-                <td className={`px-6 py-4 ${isRTL ? 'text-left' : 'text-right'}`}>
-                  {/* FIXED WIRED BUTTONS */}
-                  <button onClick={() => openModal(c)} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg transition-colors"><Edit size={18}/></button>
-                  <button onClick={() => handleDelete(c.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg transition-colors"><Trash2 size={18}/></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* SEARCH BAR */}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 relative">
+        <input 
+          type="text" 
+          placeholder={t('Search customers by name, email or phone...')} 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pl-12 outline-none focus:ring-2 focus:ring-purple-500 font-medium"
+        />
+        <span className="absolute left-7 top-1/2 -translate-y-1/2 text-slate-400">
+           <Search size={22} />
+        </span>
       </div>
+
+      {loading && customers.length === 0 ? <AdminLoader text="Loading Customers..." /> : (
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+          <table className="w-full text-left">
+            <thead className="bg-slate-900 text-white">
+              <tr>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Customer Name')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Email')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Phone')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Joined')}</th>
+                <th className={`px-6 py-4 font-bold uppercase tracking-widest text-xs ${isRTL ? 'text-left' : 'text-right'}`}>{t('Action')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium">
+              {filteredCustomers.map((c: any) => (
+                <tr key={c.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4 font-bold text-slate-900">{c.name}</td>
+                  <td className="px-6 py-4 text-slate-600">{c.email}</td>
+                  <td className="px-6 py-4 text-slate-600" dir="ltr">{c.phone || '-'}</td>
+                  <td className="px-6 py-4 text-sm text-slate-500">{new Date(c.created_at).toLocaleDateString(locale)}</td>
+                  <td className={`px-6 py-4 ${isRTL ? 'text-left' : 'text-right'}`}>
+                    <button onClick={() => openModal(c)} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg transition-colors"><Edit size={18}/></button>
+                    <button onClick={() => handleDelete(c.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                  </td>
+                </tr>
+              ))}
+              {filteredCustomers.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-bold italic">No customers found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
@@ -109,7 +141,7 @@ export default function AdminCustomersPage() {
               <div className="grid grid-cols-2 gap-6 mb-6">
                 <div>
                     <label className="block text-sm font-bold mb-2 text-slate-700">Full Name</label>
-                    <input required value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium" />
+                    <input required value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-900" />
                 </div>
                 <div>
                     <label className="block text-sm font-bold mb-2 text-slate-700">Phone Number</label>
@@ -120,11 +152,11 @@ export default function AdminCustomersPage() {
               </div>
               <div className="mb-6">
                 <label className="block text-sm font-bold mb-2 text-slate-700">Email Address</label>
-                <input required type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium" />
+                <input required type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-900" />
               </div>
               <div className="mb-8">
                 <label className="block text-sm font-bold mb-2 text-slate-700">Home Address</label>
-                <textarea rows={3} value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium" />
+                <textarea rows={3} value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-900" />
               </div>
               
               <div className="flex justify-end gap-3 border-t border-slate-100 pt-6">

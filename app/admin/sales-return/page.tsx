@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiCall } from '@/lib/apiClient';
-import { RotateCcw, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { RotateCcw, Eye, CheckCircle, XCircle, Clock, Search } from 'lucide-react';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
 import AdminLoader from '@/components/admin/AdminLoader';
 import toast from 'react-hot-toast';
@@ -13,7 +13,12 @@ export default function AdminSalesReturnPage() {
   const { t, formatCurrency, formatNumber, locale } = useAdminLocale();
   const [viewReturn, setViewReturn] = useState<any>(null);
 
+  // Search & Filter State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
   const fetchReturns = async () => {
+    setLoading(true);
     const data = await apiCall('/api/admin/returns');
     if (data) setReturns(data);
     setLoading(false);
@@ -22,6 +27,16 @@ export default function AdminSalesReturnPage() {
   useEffect(() => {
     fetchReturns();
   }, []);
+
+  const filteredReturns = returns.filter(r => {
+    const matchesSearch = r.order_id.toString().includes(searchTerm) || 
+                         r.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (r.orders?.customer_name && r.orders.customer_name.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
 
   const updateStatus = async (id: number, status: string) => {
     try {
@@ -40,55 +55,94 @@ export default function AdminSalesReturnPage() {
     }
   };
 
-  if (loading) return <AdminLoader text="Loading Returns..." />;
-
   return (
-    <div className="p-6 md:p-8 bg-slate-50 min-h-screen text-slate-900">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="bg-red-100 p-3 rounded-xl shadow-sm text-red-600"><RotateCcw size={24} /></div>
-        <h1 className="text-3xl font-black tracking-tight">{t('Sales Returns')}</h1>
+    <div className="p-8 bg-slate-50 min-h-screen text-slate-900">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div className="flex items-center gap-3">
+          <div className="bg-red-100 p-3 rounded-xl shadow-sm text-red-600"><RotateCcw size={24} /></div>
+          <h1 className="text-3xl font-black tracking-tight">{t('Sales Returns')}</h1>
+        </div>
+        <button onClick={fetchReturns} className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95">
+          <RotateCcw size={18} className={loading ? 'animate-spin' : ''} /> {t('Sync Data')}
+        </button>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-slate-900 text-white">
-            <tr>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Order ID')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Product')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Customer')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Qty')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Status')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs text-right">{t('Action')}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 font-medium">
-            {returns.map((ret: any) => (
-              <tr key={ret.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 font-bold text-slate-900">#{formatNumber(ret.order_id)}</td>
-                <td className="px-6 py-4 font-bold">{ret.product_name}</td>
-                <td className="px-6 py-4">
-                  {ret.orders?.customer_name}
-                  <span className="block text-xs font-normal text-slate-400">{ret.orders?.customer_email}</span>
-                </td>
-                <td className="px-6 py-4">{formatNumber(ret.quantity)}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    ret.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                    ret.status === 'Approved' ? 'bg-blue-100 text-blue-700' :
-                    ret.status === 'Completed' ? 'bg-green-100 text-green-700' : 
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {t(ret.status)}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <button onClick={() => setViewReturn(ret)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors rounded-lg"><Eye size={18}/></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* SEARCH & FILTERS */}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row gap-4 items-center">
+        <div className="flex-1 w-full relative">
+          <input 
+            type="text" 
+            placeholder={t('Search by Order ID, Product or Customer...')} 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 pl-10 outline-none focus:ring-2 focus:ring-red-500 font-medium"
+          />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+             <Search size={18} />
+          </span>
+        </div>
+        <div className="flex gap-4 w-full md:w-auto">
+          <select 
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-red-500 font-bold text-sm min-w-[160px]"
+          >
+            <option value="all">{t('All Statuses')}</option>
+            <option value="Pending">{t('Pending')}</option>
+            <option value="Approved">{t('Approved')}</option>
+            <option value="Completed">{t('Completed')}</option>
+            <option value="Rejected">{t('Rejected')}</option>
+          </select>
+        </div>
       </div>
+
+      {loading && returns.length === 0 ? <AdminLoader text="Loading Returns..." /> : (
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+          <table className="w-full text-left">
+            <thead className="bg-slate-900 text-white">
+              <tr>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Order ID')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Product')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Customer')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Qty')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Status')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs text-right">{t('Action')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium">
+              {filteredReturns.map((ret: any) => (
+                <tr key={ret.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4 font-bold text-slate-900">#{formatNumber(ret.order_id)}</td>
+                  <td className="px-6 py-4 font-bold">{ret.product_name}</td>
+                  <td className="px-6 py-4">
+                    {ret.orders?.customer_name}
+                    <span className="block text-xs font-normal text-slate-400">{ret.orders?.customer_email}</span>
+                  </td>
+                  <td className="px-6 py-4">{formatNumber(ret.quantity)}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      ret.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
+                      ret.status === 'Approved' ? 'bg-blue-100 text-blue-700' :
+                      ret.status === 'Completed' ? 'bg-green-100 text-green-700' : 
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {t(ret.status)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button onClick={() => setViewReturn(ret)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors rounded-lg"><Eye size={18}/></button>
+                  </td>
+                </tr>
+              ))}
+              {filteredReturns.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500 font-bold italic">No return requests found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* VIEW MODAL */}
       {viewReturn && (

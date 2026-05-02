@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { apiCall } from '@/lib/apiClient';
-import { ClipboardList, Eye, Edit, Trash2, X, Check } from 'lucide-react';
+import { ClipboardList, Eye, Edit, Trash2, X, Check, Search, RotateCcw } from 'lucide-react';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
 import Swal from 'sweetalert2';
 import AdminLoader from '@/components/admin/AdminLoader';
@@ -25,7 +25,12 @@ function InventoryContent() {
   const [editProduct, setEditProduct] = useState<any>(null);
   const [editData, setEditData] = useState({ price: '', stock_qty: '' });
 
+  // Search & Filter State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [stockFilter, setStockFilter] = useState('all');
+
   const fetchProducts = async () => {
+    setLoading(true);
     const data = await apiCall('/api/admin/products');
     if (data) setProducts(data);
     setLoading(false);
@@ -34,6 +39,18 @@ function InventoryContent() {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         (p.brand && p.brand.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    let matchesStock = true;
+    if (stockFilter === 'critical') matchesStock = Number(p.stock_qty) <= 5;
+    else if (stockFilter === 'low') matchesStock = Number(p.stock_qty) > 5 && Number(p.stock_qty) <= 20;
+    else if (stockFilter === 'in_stock') matchesStock = Number(p.stock_qty) > 20;
+
+    return matchesSearch && matchesStock;
+  });
 
   // Handle auto-view from query param
   const searchParams = useSearchParams();
@@ -70,51 +87,89 @@ function InventoryContent() {
     });
 
     if (result.isConfirmed) {
-      const res = await apiCall(`/api/admin/products?id=${product.id}`, { method: 'DELETE', showSuccessToast: true, successMessage: 'Product deleted!' });
+      const res = await apiCall(`/api/admin/products/${product.id}`, { method: 'DELETE', showSuccessToast: true, successMessage: 'Product deleted!' });
       if (res) await fetchProducts();
     }
   };
 
-  if (loading) return <AdminLoader text="Loading Inventory..." />;
-
   return (
     <div className="p-8 bg-slate-50 min-h-screen text-slate-900">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="bg-yellow-400 p-3 rounded-xl shadow-sm text-slate-900"><ClipboardList size={24} /></div>
-        <h1 className="text-3xl font-black tracking-tight">{t('Inventory')}</h1>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div className="flex items-center gap-3">
+          <div className="bg-yellow-400 p-3 rounded-xl shadow-sm text-slate-900"><ClipboardList size={24} /></div>
+          <h1 className="text-3xl font-black tracking-tight">{t('Inventory')}</h1>
+        </div>
+        <button onClick={fetchProducts} className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95">
+          <RotateCcw size={18} className={loading ? 'animate-spin' : ''} /> {t('Sync Data')}
+        </button>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-slate-900 text-white">
-            <tr>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Product')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Brand')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Price')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Stock Level')}</th>
-              <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs text-right">{t('Actions')}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 font-medium">
-            {products.map((p: any) => (
-              <tr key={p.id} className="hover:bg-slate-50 transition-colors group">
-                <td className="px-6 py-3 flex items-center gap-3">
-                  <img src={p.image_urls ? p.image_urls.split(',')[0] : '/placeholder.png'} className="w-10 h-10 object-contain bg-white border border-slate-200 rounded p-1" />
-                  <span className="text-sm font-bold line-clamp-1 max-w-[250px]">{p.name}</span>
-                </td>
-                <td className="px-6 py-3 text-sm text-slate-500">{p.brand || '-'}</td>
-                <td className="px-6 py-3 font-bold">{formatCurrency(p.price)}</td>
-                <td className="px-6 py-3">{getStockBadge(Number(p.stock_qty))}</td>
-                <td className="px-6 py-3 text-right">
-                  <button onClick={() => setViewProduct(p)} className="p-2 text-slate-400 hover:text-green-600 rounded-lg transition-colors" title="View"><Eye size={18}/></button>
-                  <button onClick={() => {setEditProduct(p); setEditData({price: p.price, stock_qty: p.stock_qty?.toString()});}} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg mx-1 transition-colors" title="Edit"><Edit size={18}/></button>
-                  <button onClick={() => handleDelete(p)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg transition-colors" title="Delete"><Trash2 size={18}/></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* SEARCH & FILTERS */}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row gap-4 items-center">
+        <div className="flex-1 w-full relative">
+          <input 
+            type="text" 
+            placeholder={t('Search inventory...')} 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 pl-10 outline-none focus:ring-2 focus:ring-yellow-500 font-medium"
+          />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+             <Search size={18} />
+          </span>
+        </div>
+        <div className="flex gap-4 w-full md:w-auto">
+          <select 
+            value={stockFilter}
+            onChange={(e) => setStockFilter(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-yellow-500 font-bold text-sm min-w-[160px]"
+          >
+            <option value="all">{t('All Stock Levels')}</option>
+            <option value="critical">{t('Critical Stock')}</option>
+            <option value="low">{t('Low Stock')}</option>
+            <option value="in_stock">{t('Healthy Stock')}</option>
+          </select>
+        </div>
       </div>
+
+      {loading && products.length === 0 ? <AdminLoader text="Loading Inventory..." /> : (
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+          <table className="w-full text-left">
+            <thead className="bg-slate-900 text-white">
+              <tr>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Product')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Brand')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Price')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs">{t('Stock Level')}</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-widest text-xs text-right">{t('Actions')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium">
+              {filteredProducts.map((p: any) => (
+                <tr key={p.id} className="hover:bg-slate-50 transition-colors group">
+                  <td className="px-6 py-3 flex items-center gap-3">
+                    <img src={p.image_urls ? p.image_urls.split(',')[0] : '/placeholder.png'} className="w-10 h-10 object-contain bg-white border border-slate-200 rounded p-1" />
+                    <span className="text-sm font-bold line-clamp-1 max-w-[250px]">{p.name}</span>
+                  </td>
+                  <td className="px-6 py-3 text-sm text-slate-500">{p.brand || '-'}</td>
+                  <td className="px-6 py-3 font-bold">{formatCurrency(p.price)}</td>
+                  <td className="px-6 py-3">{getStockBadge(Number(p.stock_qty))}</td>
+                  <td className="px-6 py-3 text-right">
+                    <button onClick={() => setViewProduct(p)} className="p-2 text-slate-400 hover:text-green-600 rounded-lg transition-colors" title="View"><Eye size={18}/></button>
+                    <button onClick={() => {setEditProduct(p); setEditData({price: p.price, stock_qty: p.stock_qty?.toString()});}} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg mx-1 transition-colors" title="Edit"><Edit size={18}/></button>
+                    <button onClick={() => handleDelete(p)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg transition-colors" title="Delete"><Trash2 size={18}/></button>
+                  </td>
+                </tr>
+              ))}
+              {filteredProducts.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-bold italic">No inventory records found matching your search.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* ===== VIEW MODAL ===== */}
       {viewProduct && (
@@ -150,12 +205,6 @@ function InventoryContent() {
                   <p className="text-lg font-bold text-yellow-600">⭐ {viewProduct.rating || 'N/A'}</p>
                 </div>
               </div>
-              {viewProduct.description && (
-                <div>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Description</p>
-                  <p className="text-sm text-slate-600 leading-relaxed">{viewProduct.description}</p>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -182,7 +231,7 @@ function InventoryContent() {
                   step="0.01"
                   value={editData.price}
                   onChange={(e) => setEditData({...editData, price: e.target.value})}
-                  className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   required
                 />
               </div>
@@ -193,7 +242,7 @@ function InventoryContent() {
                   type="number"
                   value={editData.stock_qty}
                   onChange={(e) => setEditData({...editData, stock_qty: e.target.value})}
-                  className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   required
                 />
               </div>
@@ -213,4 +262,3 @@ function InventoryContent() {
     </div>
   );
 }
-
