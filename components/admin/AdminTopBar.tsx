@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, AlertTriangle, Info, CheckCircle, Circle, Globe, ShoppingCart } from 'lucide-react';
+import { Bell, AlertTriangle, Info, CheckCircle, Circle, Globe, ShoppingCart, RotateCcw } from 'lucide-react';
 import { apiCall } from '@/lib/apiClient';
 import { useAuth } from '@/context/AuthContext';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
