@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Lock, Mail, ArrowRight, Loader2 } from "lucide-react";
-import toast from "react-hot-toast"; // Import Toast
+import toast from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
 
 // --- COMPONENT: MATRIX BACKGROUND ---
 const MatrixBackground = ({ isTyping }: { isTyping: boolean }) => {
@@ -108,6 +109,7 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const router = useRouter();
+  const { refreshUser } = useAuth();
 
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -137,6 +139,7 @@ export default function AdminLoginPage() {
 
       if (res.ok) {
         toast.success("Access Granted. Redirecting...");
+        await refreshUser();
         router.push("/admin/dashboard");
       } else {
         toast.error(data.error || "Access Denied");
