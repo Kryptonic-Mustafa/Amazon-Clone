@@ -24,7 +24,7 @@ export async function GET() {
     const totalReviews = reviews.length;
 
     // 4. Chart Data (Last 7 Days Revenue)
-    const chartData = [];
+    const chartData: any[] = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);

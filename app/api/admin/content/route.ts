@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const content = await prisma.pageContent.findMany({ where: { is_active: true,  is_active: true } });
+    const content = await prisma.pageContent.findMany({ where: { is_active: true } });
     return NextResponse.json(content, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });

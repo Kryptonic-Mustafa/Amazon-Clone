@@ -15,7 +15,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     // Fetch associated reviews safely
-    let reviews = [];
+    let reviews: any[] = [];
     try {
       reviews = await prisma.reviews.findMany({
         where: { product_id: productId },

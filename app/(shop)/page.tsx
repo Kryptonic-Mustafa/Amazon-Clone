@@ -42,7 +42,7 @@ export default function LandingPage() {
   // Logic: 
   // 1. Sale Products: sale_flag is 1 AND discount > 0
   const saleProducts = productList
-    .filter((p: any) => p.sale_flag === 1 && p.discount_percent > 0)
+    .filter((p: any) => p.sale_flag === 1 && (p.discount_percent ?? 0) > 0)
     .slice(0, 10);
 
   // 2. Top Rated: Rating >= 4.0

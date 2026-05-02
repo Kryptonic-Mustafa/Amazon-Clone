@@ -6,7 +6,7 @@ import { BookOpen, Printer, Download, Filter, Hash } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
 
-export default function LedgerPage() {
+function LedgerPageContent() {
   const searchParams = useSearchParams();
   const urlUserId = searchParams.get('userId') || 'all';
   const urlOrderId = searchParams.get('orderId') || 'all';
@@ -177,5 +177,15 @@ export default function LedgerPage() {
         )}
       </div>
     </div>
+  );
+}
+
+
+import React, { Suspense } from 'react';
+export default function LedgerPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-blue-600 font-bold">Loading...</div>}>
+      <LedgerPageContent />
+    </Suspense>
   );
 }

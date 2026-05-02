@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const reviews = await prisma.reviews.findMany({ where: { is_active: true,  is_active: true }, orderBy: { created_at: 'desc' }
+    const reviews = await prisma.reviews.findMany({ where: { is_active: true }, orderBy: { created_at: 'desc' }
     });
 
     // Fetch the products associated with these reviews to get Images and Names

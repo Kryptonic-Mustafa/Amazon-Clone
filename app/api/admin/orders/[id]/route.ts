@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
 
     // Safely fetch items if they exist
-    let items = [];
+    let items: any[] = [];
     try {
         items = await prisma.order_items.findMany({ where: { order_id: Number(id) } });
     } catch(e) {}

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const notifications = [];
+    const notifications: any[] = [];
     
     // 1. Check Inventory Levels
     const products = await prisma.products.findMany({ where: { is_active: true,  stock_qty: { lte: 20 } },
@@ -11,7 +11,7 @@ export async function GET() {
     });
 
     products.forEach(p => {
-        if (p.stock_qty <= 5) {
+        if ((p.stock_qty ?? 0) <= 5) {
             notifications.push({ 
                 id: `stock_${p.id}`, type: 'danger', 
                 title: 'Critical Stock Alert', 
@@ -19,7 +19,7 @@ export async function GET() {
                 time: new Date().toISOString(),
                 link: '/admin/inventory' // NEW: Actionable link
             });
-        } else if (p.stock_qty <= 20) {
+        } else if ((p.stock_qty ?? 0) <= 20) {
             notifications.push({ 
                 id: `stock_${p.id}`, type: 'warning', 
                 title: 'Low Stock Warning', 

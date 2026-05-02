@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const products = await prisma.products.findMany({ where: { is_active: true,  is_active: true }, orderBy: { created_at: 'desc' }
+    const products = await prisma.products.findMany({ where: { is_active: true }, orderBy: { created_at: 'desc' }
     });
     return NextResponse.json(products, { status: 200 });
   } catch (error) {

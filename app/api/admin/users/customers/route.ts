@@ -6,7 +6,7 @@ export async function GET() {
     // Attempt to fetch with ONLY the soft-delete filter. 
     // REMOVED the 'role' filter that was causing the Prisma 500 crash!
     const customers = await prisma.users.findMany({
-      where: { is_active: true },
+      where: { is_active: 1 },
       orderBy: { created_at: 'desc' }
     });
     return NextResponse.json(customers, { status: 200 });
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const newCustomer = await prisma.users.create({
       data: {
         name: data.name, email: data.email, phone: data.phone || null, address: data.address || null,
-        password: 'AdminCreatedPassword123!'
+        password_hash: 'AdminCreatedPassword123!'
       }
     });
     return NextResponse.json(newCustomer, { status: 201 });
@@ -59,7 +59,7 @@ export async function DELETE(req: Request) {
     const url = new URL(req.url);
     const id = url.searchParams.get('id');
     try {
-        await prisma.users.update({ where: { id: Number(id) }, data: { is_active: false } });
+        await prisma.users.update({ where: { id: Number(id) }, data: { is_active: 0 } });
     } catch (e) {
         await prisma.users.delete({ where: { id: Number(id) } });
     }

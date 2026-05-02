@@ -1,3 +1,8 @@
+import os
+
+FILES_TO_UPDATE = {
+    # 1. BRANDS API (Removing the duplicate key)
+    "app/api/admin/brands/route.ts": r"""
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -43,3 +48,18 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
   }
 }
+"""
+}
+
+def apply_fix():
+    print("🚀 Fixing Duplicate Key Error in Brands API...")
+    for file_path, content in FILES_TO_UPDATE.items():
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content.strip() + "\n")
+        print(f"✅ Cleaned up: {file_path}")
+
+    print("\n🎉 DONE! The TypeScript compiler will now be happy.")
+
+if __name__ == "__main__":
+    apply_fix()
