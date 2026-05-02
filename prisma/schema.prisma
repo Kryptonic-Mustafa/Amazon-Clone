@@ -16,12 +16,12 @@ model admin_users {
   password   String    @db.VarChar(255)
   is_sa      Boolean?  @default(false)
   created_at DateTime? @default(now()) @db.Timestamp(0)
-  is_active Boolean @default(true)
+  is_active  Boolean   @default(true)
 }
 
 model brands {
-  id   Int    @id @default(autoincrement())
-  name String @unique(map: "name") @db.VarChar(255)
+  id        Int     @id @default(autoincrement())
+  name      String  @unique(map: "name") @db.VarChar(255)
   is_active Boolean @default(true)
 }
 
@@ -38,7 +38,7 @@ model content_blocks {
   section_name String?   @unique(map: "section_name") @db.VarChar(50)
   content_json Json?
   last_updated DateTime? @default(now()) @db.Timestamp(0)
-  is_active Boolean @default(true)
+  is_active    Boolean   @default(true)
 }
 
 model invoices {
@@ -50,10 +50,10 @@ model invoices {
   total_amount     Decimal   @db.Decimal(10, 2)
   tax_amount       Decimal?  @default(0.00) @db.Decimal(10, 2)
   created_at       DateTime? @default(now()) @db.DateTime(0)
+  is_active        Boolean   @default(true)
   orders           orders    @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "invoices_ibfk_1")
 
   @@index([order_id], map: "order_id")
-  is_active Boolean @default(true)
 }
 
 model ledger {
@@ -66,7 +66,7 @@ model ledger {
   credit           Decimal?    @default(0.00) @db.Decimal(10, 2)
   balance          Decimal     @db.Decimal(10, 2)
   created_at       DateTime?   @default(now()) @db.Timestamp(0)
-  is_active Boolean @default(true)
+  is_active        Boolean     @default(true)
 }
 
 model offers {
@@ -84,53 +84,54 @@ model order_items {
   product_name String?  @db.VarChar(255)
   quantity     Int?
   price        Decimal? @db.Decimal(10, 2)
+  is_active    Boolean  @default(true)
   orders       orders?  @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "order_items_ibfk_1")
 
   @@index([order_id], map: "order_id")
-  is_active Boolean @default(true)
 }
 
 model orders {
-  id               Int           @id @default(autoincrement())
-  customer_name    String?       @db.VarChar(255)
-  customer_email   String?       @db.VarChar(255)
-  customer_phone   String?       @db.VarChar(50)
+  id               Int             @id @default(autoincrement())
+  customer_name    String?         @db.VarChar(255)
+  customer_email   String?         @db.VarChar(255)
+  customer_phone   String?         @db.VarChar(50)
   user_id          Int?
-  total_amount     Decimal       @db.Decimal(10, 2)
-  status           String?       @default("Pending") @db.VarChar(50)
-  invoice_no       String?       @unique(map: "invoice_no") @db.VarChar(50)
-  shipping_address String?       @db.Text
-  created_at       DateTime?     @default(now()) @db.Timestamp(0)
-  viewed           Boolean?      @default(false)
-  payment_status   String?       @default("pending") @db.VarChar(50)
+  total_amount     Decimal         @db.Decimal(10, 2)
+  status           String?         @default("Pending") @db.VarChar(50)
+  invoice_no       String?         @unique(map: "invoice_no") @db.VarChar(50)
+  shipping_address String?         @db.Text
+  created_at       DateTime?       @default(now()) @db.Timestamp(0)
+  viewed           Boolean?        @default(false)
+  payment_status   String?         @default("pending") @db.VarChar(50)
+  is_active        Boolean         @default(true)
   invoices         invoices[]
   order_items      order_items[]
   sales_returns    sales_returns[]
-  is_active Boolean @default(true)
 }
 
 model sales_returns {
-  id              Int      @id @default(autoincrement())
-  order_id        Int
-  user_id         Int
-  product_id      Int
-  product_name    String
-  quantity        Int
-  return_reason   String   @db.Text
-  status          String   @default("Pending") 
-  refund_amount   Decimal? @db.Decimal(10, 2)
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-  is_active       Boolean  @default(true)
-  orders          orders   @relation(fields: [order_id], references: [id], onDelete: Cascade)
-}
+  id            Int      @id @default(autoincrement())
+  order_id      Int
+  user_id       Int
+  product_id    Int
+  product_name  String
+  quantity      Int
+  return_reason String   @db.Text
+  status        String   @default("Pending")
+  refund_amount Decimal? @db.Decimal(10, 2)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  is_active     Boolean  @default(true)
+  orders        orders   @relation(fields: [order_id], references: [id], onDelete: Cascade)
 
+  @@index([order_id], map: "sales_returns_order_id_fkey")
+}
 
 model permissions {
   id          Int     @id @default(autoincrement())
   slug        String  @db.VarChar(100)
   description String? @db.VarChar(255)
-  is_active Boolean @default(true)
+  is_active   Boolean @default(true)
 }
 
 model products {
@@ -147,15 +148,15 @@ model products {
   brand            String?   @db.VarChar(100)
   rating           Decimal?  @default(0.0) @db.Decimal(2, 1)
   created_at       DateTime? @default(now()) @db.Timestamp(0)
-  specifications Json? @default("{}")
-  is_active Boolean @default(true)
+  specifications   Json?
+  is_active        Boolean   @default(true)
 }
 
 model roles {
   id             Int     @id @default(autoincrement())
   name           String  @db.VarChar(50)
   permission_ids String? @db.Text
-  is_active Boolean @default(true)
+  is_active      Boolean @default(true)
 }
 
 model tax_settings {
@@ -178,39 +179,32 @@ model users {
   is_active     Int?      @default(1) @db.TinyInt
 }
 
-enum ledger_type {
-  INVOICE
-  PAYMENT
-  REFUND
-  EXPENSE
-}
-
 model GlobalSettings {
-  id Int @id @default(autoincrement())
-  website_name String @default("AmazonClone")
-  logo_url String?
-  favicon_url String?
-  tax_rate Float @default(0)
-  country String @default("KW")
-  is_active Boolean @default(true)
+  id           Int     @id @default(autoincrement())
+  website_name String  @default("AmazonClone")
+  logo_url     String?
+  favicon_url  String?
+  tax_rate     Float   @default(0)
+  country      String  @default("KW")
+  is_active    Boolean @default(true)
 }
 
 model Store {
-  id Int @id @default(autoincrement())
-  name String
+  id          Int      @id @default(autoincrement())
+  name        String
   description String?
-  logo_url String?
-  created_at DateTime @default(now())
-  is_active Boolean @default(true)
+  logo_url    String?
+  created_at  DateTime @default(now())
+  is_active   Boolean  @default(true)
 }
 
 model PageContent {
   id          Int      @id @default(autoincrement())
   section_key String   @unique
-  content_en  Json     @default("{}")
-  content_ar  Json     @default("{}")
+  content_en  Json
+  content_ar  Json
   updated_at  DateTime @updatedAt
-  is_active Boolean @default(true)
+  is_active   Boolean  @default(true)
 }
 
 model reviews {
@@ -221,26 +215,33 @@ model reviews {
   rating     Int
   comment    String   @db.Text
   created_at DateTime @default(now())
-  is_active Boolean @default(true)
+  is_active  Boolean  @default(true)
 }
 
 model quotations {
-  id           Int      @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   customer_name String
-  email        String?
-  total_amount Decimal  @db.Decimal(10,2)
-  status       String   @default("Pending")
-  items        Json     
-  created_at   DateTime @default(now())
-  is_active Boolean @default(true)
+  email         String?
+  total_amount  Decimal  @db.Decimal(10, 2)
+  status        String   @default("Pending")
+  items         Json
+  created_at    DateTime @default(now())
+  is_active     Boolean  @default(true)
 }
 
 model purchase_orders {
-  id           Int      @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   supplier_name String
-  total_amount Decimal  @db.Decimal(10,2)
-  status       String   @default("Draft")
-  items        Json     
-  created_at   DateTime @default(now())
-  is_active Boolean @default(true)
+  total_amount  Decimal  @db.Decimal(10, 2)
+  status        String   @default("Draft")
+  items         Json
+  created_at    DateTime @default(now())
+  is_active     Boolean  @default(true)
+}
+
+enum ledger_type {
+  INVOICE
+  PAYMENT
+  REFUND
+  EXPENSE
 }
