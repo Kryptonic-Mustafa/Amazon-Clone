@@ -159,6 +159,7 @@ export default function AdminTopBar() {
                           {n.type === 'warning' && <AlertTriangle size={18} className={iconColor} />}
                           {n.category === 'inventory' && <AlertTriangle size={18} className={iconColor} />}
                           {n.category === 'order' && <ShoppingCart size={18} className={iconColor} />}
+                          {n.category === 'return' && <RotateCcw size={18} className={iconColor} />}
                           {!n.category && n.type === 'info' && <Info size={18} className={iconColor} />}
                         </div>
                         <div className="flex-1 min-w-0">
