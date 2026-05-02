@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { apiCall } from '@/lib/apiClient';
 import { ClipboardList, Eye, Edit, Trash2, X, Check } from 'lucide-react';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
@@ -8,6 +9,14 @@ import Swal from 'sweetalert2';
 import AdminLoader from '@/components/admin/AdminLoader';
 
 export default function InventoryPage() {
+  return (
+    <Suspense fallback={<AdminLoader text="Loading Inventory..." />}>
+      <InventoryContent />
+    </Suspense>
+  );
+}
+
+function InventoryContent() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { t, formatCurrency, formatNumber } = useAdminLocale();
@@ -25,6 +34,16 @@ export default function InventoryPage() {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  // Handle auto-view from query param
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const viewId = searchParams.get('view');
+    if (viewId && products.length > 0) {
+      const product = products.find(p => String(p.id) === viewId);
+      if (product) setViewProduct(product);
+    }
+  }, [searchParams, products]);
 
   const getStockBadge = (qty: number) => {
     if (qty <= 5) return <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold border border-red-200">{t('Critical')} ({formatNumber(qty)})</span>;
