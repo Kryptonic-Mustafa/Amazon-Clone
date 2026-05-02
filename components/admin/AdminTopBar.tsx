@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, AlertTriangle, Info, CheckCircle, Circle, Globe } from 'lucide-react';
+import { Bell, AlertTriangle, Info, CheckCircle, Circle, Globe, ShoppingCart } from 'lucide-react';
 import { apiCall } from '@/lib/apiClient';
 import { useAuth } from '@/context/AuthContext';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
@@ -32,7 +32,7 @@ export default function AdminTopBar() {
       if (data) setNotifications(data);
     };
     fetchNotifs();
-    const interval = setInterval(fetchNotifs, 60000);
+    const interval = setInterval(fetchNotifs, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -157,7 +157,9 @@ export default function AdminTopBar() {
                         <div className={`mt-0.5 flex-shrink-0 w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center`}>
                           {n.type === 'danger' && <AlertTriangle size={18} className={iconColor} />}
                           {n.type === 'warning' && <AlertTriangle size={18} className={iconColor} />}
-                          {n.type === 'info' && <Info size={18} className={iconColor} />}
+                          {n.category === 'inventory' && <AlertTriangle size={18} className={iconColor} />}
+                          {n.category === 'order' && <ShoppingCart size={18} className={iconColor} />}
+                          {!n.category && n.type === 'info' && <Info size={18} className={iconColor} />}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className={`text-sm font-bold ${titleColor}`}>{n.title}</h4>

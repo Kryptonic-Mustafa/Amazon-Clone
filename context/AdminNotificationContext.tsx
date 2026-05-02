@@ -37,16 +37,21 @@ export const AdminNotificationProvider = ({ children }: { children: React.ReactN
       try {
         const res = await fetch('/api/admin/notifications');
         if (!res.ok) return;
-        const data: Order[] = await res.json();
+        const allNotifications: any[] = await res.json();
         
-        if (Array.isArray(data)) {
-          const currentIds = new Set(data.map(o => o.id));
+        if (Array.isArray(allNotifications)) {
+          // Extract only Order-type notifications for this specific context
+          const orders = allNotifications
+            .filter(n => n.category === 'order')
+            .map(n => n.orderData);
+
+          const currentIds = new Set(orders.map(o => o.id));
           const previousIds = prevOrderIdsRef.current;
           
-          const hasNewOrder = data.some(order => !previousIds.has(order.id));
+          const hasNewOrder = orders.some(order => !previousIds.has(order.id));
 
           if (hasNewOrder && previousIds.size > 0) {
-             const latestOrder = data[0];
+             const latestOrder = orders[0];
              if (audioRef.current) audioRef.current.play().catch(() => {});
 
               toast((t) => (
@@ -68,7 +73,7 @@ export const AdminNotificationProvider = ({ children }: { children: React.ReactN
               ), { duration: 6000, position: 'top-right', style: { background: 'transparent', boxShadow: 'none', padding: 0 } });
           }
           prevOrderIdsRef.current = currentIds;
-          setUnreadOrders(data);
+          setUnreadOrders(orders);
         }
       } catch (error) {
         console.error("Poll Error", error);

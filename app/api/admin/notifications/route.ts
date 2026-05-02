@@ -6,44 +6,58 @@ export async function GET() {
     const notifications: any[] = [];
     
     // 1. Check Inventory Levels
-    const products = await prisma.products.findMany({ where: { is_active: true,  stock_qty: { lte: 20 } },
+    const products = await prisma.products.findMany({ 
+        where: { is_active: true,  stock_qty: { lte: 20 } },
         select: { id: true, name: true, stock_qty: true }
     });
 
     products.forEach(p => {
         if ((p.stock_qty ?? 0) <= 5) {
             notifications.push({ 
-                id: `stock_${p.id}`, type: 'danger', 
+                id: `stock_${p.id}`, 
+                type: 'danger', 
                 title: 'Critical Stock Alert', 
                 message: `${p.name} only has ${p.stock_qty} units left! Restock immediately.`, 
                 time: new Date().toISOString(),
-                link: '/admin/inventory' // NEW: Actionable link
+                link: '/admin/inventory',
+                category: 'inventory'
             });
         } else if ((p.stock_qty ?? 0) <= 20) {
             notifications.push({ 
-                id: `stock_${p.id}`, type: 'warning', 
+                id: `stock_${p.id}`, 
+                type: 'warning', 
                 title: 'Low Stock Warning', 
                 message: `${p.name} is running low (${p.stock_qty} units left).`, 
                 time: new Date().toISOString(),
-                link: '/admin/inventory' // NEW: Actionable link
+                link: '/admin/inventory',
+                category: 'inventory'
             });
         }
     });
 
-    // 2. Check Recent Orders
+    // 2. Check Recent Pending/New Orders (Increase limit to see more)
     const recentOrders = await prisma.orders.findMany({
-        take: 15,
+        take: 50,
         orderBy: { created_at: 'desc' },
-        select: { id: true, customer_name: true, total_amount: true, created_at: true }
+        select: { id: true, customer_name: true, total_amount: true, created_at: true, status: true }
     });
 
     recentOrders.forEach(o => {
         notifications.push({ 
-            id: `order_${o.id}`, type: 'info', 
+            id: `order_${o.id}`, 
+            type: 'info', 
             title: 'New Order Received', 
-            message: `Order #${o.id} placed by ${o.customer_name} for $${Number(o.total_amount).toFixed(2)}.`, 
+            message: `Order #${o.id} from ${o.customer_name} for $${Number(o.total_amount).toFixed(2)}.`, 
             time: o.created_at,
-            link: '/admin/orders' // NEW: Actionable link
+            link: `/admin/orders/${o.id}`,
+            category: 'order',
+            orderData: { // Pass raw data for context usage
+              id: o.id,
+              customer_name: o.customer_name,
+              total_amount: o.total_amount,
+              created_at: o.created_at,
+              status: o.status
+            }
         });
     });
 
