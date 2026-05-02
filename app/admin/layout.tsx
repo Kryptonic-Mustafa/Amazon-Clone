@@ -1,9 +1,25 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopBar from "@/components/admin/AdminTopBar";
 import { AdminNotificationProvider } from "@/context/AdminNotificationContext";
 import { AdminLocaleProvider } from "@/context/AdminLocaleContext";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/admin/login";
+
+  if (isLoginPage) {
+    return (
+      <AdminLocaleProvider>
+        <AdminNotificationProvider>
+          {children}
+        </AdminNotificationProvider>
+      </AdminLocaleProvider>
+    );
+  }
+
   return (
     <AdminLocaleProvider>
       <AdminNotificationProvider>
@@ -20,3 +36,4 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </AdminLocaleProvider>
   );
 }
+

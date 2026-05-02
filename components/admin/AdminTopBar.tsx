@@ -176,14 +176,14 @@ export default function AdminTopBar() {
         {/* 4. LOGGED IN USER PROFILE */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-black shadow-sm border-2 border-white outline outline-1 outline-slate-200 uppercase">
-            {(user?.name || user?.email || 'A').charAt(0)}
+            {user?.name ? user.name.charAt(0) : (user?.email ? user.email.charAt(0) : '?')}
           </div>
           <div className={`hidden md:block ${isRTL ? 'text-right' : 'text-left'}`}>
             <p className="text-sm font-black text-slate-900 leading-tight">
-              Hi, {user?.name || 'Admin'}
+              {user?.name || 'System User'}
             </p>
             <p className="text-xs text-slate-500 font-bold leading-tight">
-              {user?.email || 'admin@example.com'}
+              {user?.email || 'authenticated'}
             </p>
           </div>
         </div>

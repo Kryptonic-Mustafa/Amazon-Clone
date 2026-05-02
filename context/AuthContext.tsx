@@ -30,7 +30,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const checkUser = async () => {
     try {
-      const res = await fetch('/api/shop/auth/me');
+      const is_admin_route = window.location.pathname.startsWith('/admin');
+      const endpoint = is_admin_route ? '/api/admin/auth/me' : '/api/shop/auth/me';
+      
+      const res = await fetch(endpoint);
       const data = await res.json();
       setUser(data.user);
     } catch (error) {
@@ -50,9 +53,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = async () => {
-    await fetch('/api/shop/auth/logout', { method: 'POST' });
+    const is_admin_route = window.location.pathname.startsWith('/admin');
+    const endpoint = is_admin_route ? '/api/admin/logout' : '/api/shop/auth/logout';
+    
+    await fetch(endpoint, { method: 'POST' });
     setUser(null);
-    router.push('/login');
+    router.push(is_admin_route ? '/admin/login' : '/login');
     toast.success("Logged out successfully");
   };
 
