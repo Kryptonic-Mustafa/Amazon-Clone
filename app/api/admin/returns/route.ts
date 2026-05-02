@@ -4,6 +4,13 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     console.log("Fetching sales returns...");
+    
+    // SAFE CHECK: Check if the table exists in the client (prevents crash on stale local clients)
+    if (!(prisma as any).sales_returns) {
+      console.warn("Prisma client is stale: 'sales_returns' model not found. Please run 'npx prisma generate'.");
+      return NextResponse.json([], { status: 200 });
+    }
+
     const returns = await (prisma as any).sales_returns.findMany({
       include: {
         orders: {
@@ -16,6 +23,7 @@ export async function GET() {
       orderBy: { created_at: 'desc' }
     });
     console.log(`Found ${returns.length} returns`);
+
     return NextResponse.json(returns, { status: 200 });
   } catch (error: any) {
     console.error('Admin Fetch Returns Error Detailed:', error.message || error);

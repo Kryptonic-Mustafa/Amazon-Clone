@@ -61,25 +61,30 @@ export async function GET() {
         });
     });
 
-    // 3. Check Pending Returns
-    const pendingReturns = await prisma.sales_returns.findMany({
-        where: { status: 'Pending' },
-        take: 10,
-        orderBy: { created_at: 'desc' },
-        include: { orders: { select: { customer_name: true } } }
-    });
-
-    pendingReturns.forEach(r => {
-        notifications.push({
-            id: `return_${r.id}`,
-            type: 'warning',
-            title: 'New Return Request',
-            message: `${r.orders?.customer_name} requested a return for ${r.product_name}.`,
-            time: r.created_at,
-            link: `/admin/sales-return`,
-            category: 'return'
+    // 3. Check Pending Returns (Safe check for stale client)
+    if ((prisma as any).sales_returns) {
+        const pendingReturns = await (prisma as any).sales_returns.findMany({
+            where: { status: 'Pending' },
+            take: 10,
+            orderBy: { created_at: 'desc' },
+            include: { orders: { select: { customer_name: true } } }
         });
-    });
+
+        pendingReturns.forEach((r: any) => {
+            notifications.push({
+                id: `return_${r.id}`,
+                type: 'warning',
+                title: 'New Return Request',
+                message: `${r.orders?.customer_name} requested a return for ${r.product_name}.`,
+                time: r.created_at,
+                link: `/admin/sales-return`,
+                category: 'return'
+            });
+        });
+    } else {
+        console.warn("Prisma client stale: sales_returns table not found in current client.");
+    }
+
 
     // Sort all notifications by time (newest first)
     notifications.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
