@@ -110,21 +110,20 @@ model orders {
 }
 
 model sales_returns {
-  id            Int      @id @default(autoincrement())
-  order_id      Int
-  user_id       Int
-  product_id    Int
-  product_name  String
-  quantity      Int
-  return_reason String   @db.Text
-  status        String   @default("Pending")
-  refund_amount Decimal? @db.Decimal(10, 2)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  is_active     Boolean  @default(true)
-  orders        orders   @relation(fields: [order_id], references: [id], onDelete: Cascade)
-
-  @@index([order_id], map: "sales_returns_order_id_fkey")
+  id              Int      @id @default(autoincrement())
+  order_id        Int
+  user_id         Int
+  product_id      Int
+  product_name    String
+  quantity        Int
+  return_reason   String   @db.Text
+  status          String   @default("Pending") 
+  refund_amount   Decimal? @db.Decimal(10, 2)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  is_active       Boolean  @default(true)
+  stock_restored  Boolean  @default(false)
+  orders          orders   @relation(fields: [order_id], references: [id], onDelete: Cascade)
 }
 
 model permissions {

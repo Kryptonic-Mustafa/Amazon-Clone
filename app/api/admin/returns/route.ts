@@ -49,8 +49,11 @@ export async function PUT(req: Request) {
         }
       });
 
-      // 2. If status is changing to 'Completed', increase product stock
-      if (status === 'Completed' && existingReturn.status !== 'Completed') {
+      // 2. If status is changing to 'Approved' or 'Completed', and stock hasn't been restored yet
+      const shouldRestoreStock = (status === 'Approved' || status === 'Completed') && !existingReturn.stock_restored;
+
+      if (shouldRestoreStock) {
+        // Increment stock
         await (tx as any).products.update({
           where: { id: existingReturn.product_id },
           data: {
@@ -59,15 +62,21 @@ export async function PUT(req: Request) {
             }
           }
         });
+
+        // Mark as restored so we don't do it again if status changes from Approved -> Completed
+        await (tx as any).sales_returns.update({
+          where: { id },
+          data: { stock_restored: true }
+        });
         
-        // Optional: Create a ledger entry for the refund
-        if (refund_amount) {
+        // Optional: Create a ledger entry if completing with refund
+        if (status === 'Completed' && refund_amount) {
           await (tx as any).ledger.create({
             data: {
               description: `Refund for Sales Return #${id} (Order #${existingReturn.order_id})`,
               type: 'REFUND',
               debit: parseFloat(refund_amount),
-              balance: 0, // Logic for balance calculation would go here if needed
+              balance: 0,
               reference_id: id
             }
           });
@@ -76,6 +85,7 @@ export async function PUT(req: Request) {
 
       return updatedReturn;
     });
+
 
     return NextResponse.json(result, { status: 200 });
   } catch (error: any) {
