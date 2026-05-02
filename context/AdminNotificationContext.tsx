@@ -49,22 +49,23 @@ export const AdminNotificationProvider = ({ children }: { children: React.ReactN
              const latestOrder = data[0];
              if (audioRef.current) audioRef.current.play().catch(() => {});
 
-             toast((t) => (
+              toast((t) => (
                 <div 
-                  className="cursor-pointer flex items-center gap-4 bg-white p-2 rounded-lg"
+                  className="cursor-pointer flex items-center gap-4 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-800 animate-in slide-in-from-right-5 w-80"
                   onClick={() => { setShowModal(true); toast.dismiss(t.id); }}
                 >
-                  <div className="bg-red-500 p-3 rounded-full text-white animate-bell">
-                    <Bell size={24} fill="white" />
+                  <div className="bg-blue-600 p-3 rounded-xl text-white shadow-lg shadow-blue-900/20 flex-shrink-0">
+                    <Bell size={24} className="animate-bounce" />
                   </div>
-                  <div>
-                    <p className="font-bold text-gray-900 text-sm">1 Notification</p>
-                    <p className="text-sm text-gray-600">
-                      Order placed by <span className="font-bold text-gray-900">{latestOrder.customer_name}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-white text-sm uppercase tracking-wider">New Order!</p>
+                    <p className="text-sm text-slate-400 mt-1 truncate">
+                      From <span className="text-blue-400 font-bold">{latestOrder.customer_name}</span>
                     </p>
+                    <p className="text-[10px] text-slate-500 mt-1 font-bold">Click to view details</p>
                   </div>
                 </div>
-              ), { duration: 6000, position: 'top-right', style: { background: 'transparent', boxShadow: 'none' } });
+              ), { duration: 6000, position: 'top-right', style: { background: 'transparent', boxShadow: 'none', padding: 0 } });
           }
           prevOrderIdsRef.current = currentIds;
           setUnreadOrders(data);
