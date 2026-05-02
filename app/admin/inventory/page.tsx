@@ -15,12 +15,13 @@ export default function InventoryPage() {
   const [editProduct, setEditProduct] = useState<any>(null);
   const [editData, setEditData] = useState({ price: '', stock_qty: '' });
 
+  const fetchProducts = async () => {
+    const data = await apiCall('/api/admin/products');
+    if (data) setProducts(data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      const data = await apiCall('/api/admin/products');
-      if (data) setProducts(data);
-      setLoading(false);
-    };
     fetchProducts();
   }, []);
 
@@ -32,8 +33,26 @@ export default function InventoryPage() {
 
   const handleEditSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await apiCall('/api/admin/inventory', { method: 'PUT', body: { id: editProduct.id, price: editData.price, stock_qty: editData.stock_qty }, showSuccessToast: true });
-    if (res) { setEditProduct(null); const data = await apiCall('/api/admin/products'); if(data) setProducts(data); }
+    const res = await apiCall('/api/admin/inventory', { method: 'PUT', body: { id: editProduct.id, price: editData.price, stock_qty: editData.stock_qty }, showSuccessToast: true, successMessage: 'Inventory updated!' });
+    if (res) { setEditProduct(null); await fetchProducts(); }
+  };
+
+  const handleDelete = async (product: any) => {
+    const result = await Swal.fire({
+      title: 'Delete Product?',
+      text: `Are you sure you want to delete "${product.name}"? This cannot be undone.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Yes, Delete',
+      cancelButtonText: 'Cancel',
+    });
+
+    if (result.isConfirmed) {
+      const res = await apiCall(`/api/admin/products?id=${product.id}`, { method: 'DELETE', showSuccessToast: true, successMessage: 'Product deleted!' });
+      if (res) await fetchProducts();
+    }
   };
 
   if (loading) return <div className="p-8 text-center font-bold text-slate-500">Loading Inventory Data...</div>;
@@ -67,15 +86,111 @@ export default function InventoryPage() {
                 <td className="px-6 py-3 font-bold">{formatCurrency(p.price)}</td>
                 <td className="px-6 py-3">{getStockBadge(Number(p.stock_qty))}</td>
                 <td className="px-6 py-3 text-right">
-                  <button onClick={() => setViewProduct(p)} className="p-2 text-slate-400 hover:text-green-600 rounded-lg"><Eye size={18}/></button>
-                  <button onClick={() => {setEditProduct(p); setEditData({price: p.price, stock_qty: p.stock_qty?.toString()});}} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg mx-1"><Edit size={18}/></button>
-                  <button className="p-2 text-slate-400 hover:text-red-600 rounded-lg"><Trash2 size={18}/></button>
+                  <button onClick={() => setViewProduct(p)} className="p-2 text-slate-400 hover:text-green-600 rounded-lg transition-colors" title="View"><Eye size={18}/></button>
+                  <button onClick={() => {setEditProduct(p); setEditData({price: p.price, stock_qty: p.stock_qty?.toString()});}} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg mx-1 transition-colors" title="Edit"><Edit size={18}/></button>
+                  <button onClick={() => handleDelete(p)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg transition-colors" title="Delete"><Trash2 size={18}/></button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* ===== VIEW MODAL ===== */}
+      {viewProduct && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setViewProduct(null)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+              <h2 className="font-bold text-lg">Product Details</h2>
+              <button onClick={() => setViewProduct(null)} className="p-1 hover:bg-white/10 rounded-lg transition-colors"><X size={20} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-4">
+                <img src={viewProduct.image_urls ? viewProduct.image_urls.split(',')[0] : '/placeholder.png'} className="w-20 h-20 object-contain bg-slate-50 border border-slate-200 rounded-xl p-2" />
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">{viewProduct.name}</h3>
+                  <p className="text-sm text-slate-500">{viewProduct.brand || 'No Brand'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 rounded-2xl p-4">
+                <div>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Price</p>
+                  <p className="text-xl font-black text-slate-900">{formatCurrency(viewProduct.price)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Stock</p>
+                  <p className="text-xl font-black">{getStockBadge(Number(viewProduct.stock_qty))}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Discount</p>
+                  <p className="text-lg font-bold text-slate-900">{viewProduct.discount_percent || 0}%</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Rating</p>
+                  <p className="text-lg font-bold text-yellow-600">⭐ {viewProduct.rating || 'N/A'}</p>
+                </div>
+              </div>
+              {viewProduct.description && (
+                <div>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Description</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">{viewProduct.description}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== EDIT MODAL ===== */}
+      {editProduct && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setEditProduct(null)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
+              <h2 className="font-bold text-lg">Edit Inventory</h2>
+              <button onClick={() => setEditProduct(null)} className="p-1 hover:bg-white/10 rounded-lg transition-colors"><X size={20} /></button>
+            </div>
+            <form onSubmit={handleEditSave} className="p-6 space-y-5">
+              <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-3 border border-slate-200">
+                <img src={editProduct.image_urls ? editProduct.image_urls.split(',')[0] : '/placeholder.png'} className="w-10 h-10 object-contain rounded" />
+                <span className="font-bold text-sm text-slate-900">{editProduct.name}</span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Price</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={editData.price}
+                  onChange={(e) => setEditData({...editData, price: e.target.value})}
+                  className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Stock Quantity</label>
+                <input
+                  type="number"
+                  value={editData.stock_qty}
+                  onChange={(e) => setEditData({...editData, stock_qty: e.target.value})}
+                  className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setEditProduct(null)} className="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all">
+                  Cancel
+                </button>
+                <button type="submit" className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg">
+                  <Check size={18} /> Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
