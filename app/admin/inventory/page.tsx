@@ -5,6 +5,7 @@ import { apiCall } from '@/lib/apiClient';
 import { ClipboardList, Eye, Edit, Trash2, X, Check } from 'lucide-react';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
 import Swal from 'sweetalert2';
+import AdminLoader from '@/components/admin/AdminLoader';
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -55,7 +56,7 @@ export default function InventoryPage() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center font-bold text-slate-500">Loading Inventory Data...</div>;
+  if (loading) return <AdminLoader text="Loading Inventory..." />;
 
   return (
     <div className="p-8 bg-slate-50 min-h-screen text-slate-900">

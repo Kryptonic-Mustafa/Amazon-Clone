@@ -7,6 +7,7 @@ import { useAdminLocale } from '@/context/AdminLocaleContext';
 import Swal from 'sweetalert2';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
+import AdminLoader from '@/components/admin/AdminLoader';
 
 export default function AdminCustomersPage() {
   const [customers, setCustomers] = useState<any[]>([]);
@@ -53,7 +54,7 @@ export default function AdminCustomersPage() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center font-bold text-slate-500">Loading customers...</div>;
+  if (loading) return <AdminLoader text="Loading Customers..." />;
 
   return (
     <div className="p-6 md:p-8 bg-slate-50 min-h-screen text-slate-900">

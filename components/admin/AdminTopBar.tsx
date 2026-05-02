@@ -131,34 +131,40 @@ export default function AdminTopBar() {
           </button>
 
           {isOpen && (
-            <div className="absolute right-0 mt-3 w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 animate-in slide-in-from-top-2">
+            <div className="absolute right-0 mt-3 w-[420px] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 animate-in slide-in-from-top-2">
               <div className="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
-                <h3 className="font-bold">Notifications</h3>
-                <span className="bg-blue-600 text-xs px-2 py-1 rounded-full font-bold">{unreadCount} New</span>
+                <h3 className="font-bold text-base">Notifications</h3>
+                <span className="bg-blue-600 text-xs px-3 py-1 rounded-full font-bold">{unreadCount} New</span>
               </div>
               <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                 {notifications.length === 0 ? (
-                  <div className="p-8 text-center text-slate-500 text-sm font-medium">All caught up!</div>
+                  <div className="p-8 text-center text-slate-400 text-sm font-medium flex flex-col items-center gap-2">
+                    <Bell size={32} className="text-slate-200" />
+                    All caught up! No new notifications.
+                  </div>
                 ) : (
                   notifications.map((n, idx) => {
                     const isRead = readIds.includes(n.id);
+                    const iconBg = n.type === 'danger' ? 'bg-red-100' : n.type === 'warning' ? 'bg-amber-100' : 'bg-blue-100';
+                    const iconColor = n.type === 'danger' ? 'text-red-600' : n.type === 'warning' ? 'text-amber-600' : 'text-blue-600';
+                    const titleColor = n.type === 'danger' ? 'text-red-600' : n.type === 'warning' ? 'text-amber-600' : 'text-blue-600';
                     return (
                       <div 
                         key={idx} 
                         onClick={() => handleNotificationClick(n.id, n.link)}
-                        className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors flex gap-4 cursor-pointer ${isRead ? 'opacity-60' : 'bg-white'}`}
+                        className={`px-5 py-4 border-b border-slate-100 hover:bg-slate-50 transition-all flex gap-4 cursor-pointer ${isRead ? 'opacity-50 bg-slate-50/50' : 'bg-white'}`}
                       >
-                        <div className="mt-1 flex-shrink-0">
-                          {n.type === 'danger' && <AlertTriangle size={20} className="text-red-500" />}
-                          {n.type === 'warning' && <AlertTriangle size={20} className="text-yellow-500" />}
-                          {n.type === 'info' && <Info size={20} className="text-blue-500" />}
+                        <div className={`mt-0.5 flex-shrink-0 w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center`}>
+                          {n.type === 'danger' && <AlertTriangle size={18} className={iconColor} />}
+                          {n.type === 'warning' && <AlertTriangle size={18} className={iconColor} />}
+                          {n.type === 'info' && <Info size={18} className={iconColor} />}
                         </div>
-                        <div className="flex-1">
-                          <h4 className={`text-sm font-bold ${n.type === 'danger' ? 'text-red-600' : n.type === 'warning' ? 'text-yellow-600' : 'text-blue-600'}`}>{n.title}</h4>
-                          <p className="text-sm text-slate-700 mt-0.5 leading-snug">{n.message}</p>
-                          <p className="text-xs text-slate-400 mt-2 font-medium">{new Date(n.time).toLocaleString()}</p>
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`text-sm font-bold ${titleColor}`}>{n.title}</h4>
+                          <p className="text-sm text-slate-600 mt-0.5 leading-snug line-clamp-2">{n.message}</p>
+                          <p className="text-[11px] text-slate-400 mt-1.5 font-semibold">{new Date(n.time).toLocaleString()}</p>
                         </div>
-                        <button onClick={(e) => toggleRead(n.id, e)} className="text-slate-400 hover:text-blue-600" title={isRead ? "Mark as unread" : "Mark as read"}>
+                        <button onClick={(e) => toggleRead(n.id, e)} className="text-slate-300 hover:text-blue-600 transition-colors flex-shrink-0 mt-1" title={isRead ? "Mark as unread" : "Mark as read"}>
                           {isRead ? <CheckCircle size={18} className="text-green-500"/> : <Circle size={18} />}
                         </button>
                       </div>

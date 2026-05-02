@@ -29,7 +29,7 @@ export default function RootLayout({
           <WishlistProvider>
             <CartProvider>
               <ShopFilterProvider>
-                <Toaster position="top-center" />
+                <Toaster position="top-right" toastOptions={{ duration: 3000 }} containerStyle={{ zIndex: 99999 }} />
                 {children}
               </ShopFilterProvider>
             </CartProvider>

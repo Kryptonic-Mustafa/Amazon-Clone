@@ -5,6 +5,7 @@ import { apiCall } from '@/lib/apiClient';
 import { ShoppingCart, Eye } from 'lucide-react';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
 import Link from 'next/link';
+import AdminLoader from '@/components/admin/AdminLoader';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -20,7 +21,7 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }, []);
 
-  if (loading) return <div className="p-8 text-center font-bold text-slate-500">Loading orders...</div>;
+  if (loading) return <AdminLoader text="Loading Orders..." />;
 
   return (
     <div className="p-6 md:p-8 bg-slate-50 min-h-screen text-slate-900">

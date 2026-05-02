@@ -6,6 +6,7 @@ import { apiCall } from '@/lib/apiClient';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
 import { ArrowLeft, Printer, FileText, BookOpen, MapPin, Phone, Mail, Globe, Hash } from 'lucide-react';
 import Link from 'next/link';
+import AdminLoader from '@/components/admin/AdminLoader';
 
 export default function OrderDetailsPage() {
   const { id } = useParams();
@@ -67,7 +68,7 @@ export default function OrderDetailsPage() {
     router.push(`/admin/accounts/ledger?orderId=${id}&userId=${order.user_id || 'all'}`);
   };
 
-  if (loading) return <div className="p-8 text-center font-bold text-slate-500 min-h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) return <AdminLoader text="Loading Order Details..." />;
   if (!order) return <div className="p-8 text-center font-bold text-red-500 min-h-screen flex items-center justify-center">Not Found</div>;
 
   const subtotal = Number(order.total_amount) - (invoice ? Number(invoice.tax_amount) : 0);

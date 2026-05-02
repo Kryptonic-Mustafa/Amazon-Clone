@@ -6,6 +6,7 @@ import { Plus, Edit, Trash2, X, Check, ChevronDown, Link as LinkIcon, Upload, Ta
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import { useAdminLocale } from '@/context/AdminLocaleContext';
+import AdminLoader from '@/components/admin/AdminLoader';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -139,7 +140,7 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {loading ? <div className="text-center font-bold text-slate-500 py-12">Loading...</div> : (
+      {loading ? <AdminLoader text="Loading Products..." /> : (
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
           <table className="w-full text-left">
             <thead className="bg-slate-900 text-white">

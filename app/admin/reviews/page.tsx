@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { apiCall } from '@/lib/apiClient';
 import { Star, Trash2, MessageSquare } from 'lucide-react';
 import Swal from 'sweetalert2';
+import AdminLoader from '@/components/admin/AdminLoader';
 
 export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -35,7 +36,7 @@ export default function AdminReviewsPage() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center font-bold text-slate-500">Loading reviews...</div>;
+  if (loading) return <AdminLoader text="Loading Reviews..." />;
 
   return (
     <div className="p-8 bg-slate-50 min-h-screen text-slate-900">

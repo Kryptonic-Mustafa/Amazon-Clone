@@ -1,5 +1,6 @@
 "use client";
 
+import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 
 interface ApiOptions {
@@ -26,25 +27,57 @@ export const apiCall = async (url: string, options: ApiOptions = {}) => {
     }
 
     if (showSuccessToast) {
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'success',
-        title: successMessage,
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
+      toast.success(successMessage, {
+        duration: 3000,
+        style: {
+          background: '#0f172a',
+          color: '#fff',
+          fontWeight: 700,
+          borderRadius: '12px',
+          padding: '14px 20px',
+          fontSize: '14px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+        },
+        iconTheme: { primary: '#22c55e', secondary: '#fff' },
       });
     }
 
     return data;
   } catch (error: any) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: error.message || 'Network error occurred',
-      confirmButtonColor: '#2563eb'
+    toast.error(error.message || 'Network error occurred', {
+      duration: 4000,
+      style: {
+        background: '#0f172a',
+        color: '#fff',
+        fontWeight: 700,
+        borderRadius: '12px',
+        padding: '14px 20px',
+        fontSize: '14px',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+      },
+      iconTheme: { primary: '#ef4444', secondary: '#fff' },
     });
     return null;
   }
+};
+
+// Keep Swal for confirmation dialogs only
+export const confirmAction = async (title: string, text: string) => {
+  const result = await Swal.fire({
+    title,
+    text,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#64748b',
+    confirmButtonText: 'Yes, Confirm',
+    cancelButtonText: 'Cancel',
+    customClass: {
+      popup: 'rounded-2xl',
+      title: 'text-slate-900 font-bold',
+      confirmButton: 'rounded-xl font-bold',
+      cancelButton: 'rounded-xl font-bold',
+    },
+  });
+  return result.isConfirmed;
 };
