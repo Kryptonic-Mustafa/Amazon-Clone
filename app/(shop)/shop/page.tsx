@@ -94,7 +94,7 @@ export default function ShopPage() {
     setFilteredProducts(result);
   }, [allProducts, selectedCategory, maxPrice, selectedBrands, sortOption, searchQuery, dbCategories]);
 
-  const sidebarCategories = ['All Products', ...dbCategories.map((c: any) => c.name)];
+  const sidebarCategories = Array.from(new Set(['All Products', ...dbCategories.map((c: any) => c.name).filter(Boolean)]));
   const brands = Array.from(new Set(allProducts.map((p: any) => p.brand || 'Generic').filter(Boolean)));
 
   return (
